@@ -3,7 +3,6 @@ const path = require("path");
 
 const settingsPath = path.join(__dirname, "../settings.json");
 
-// Initialize settings file if it doesn't exist
 if (!fs.existsSync(settingsPath)) {
     fs.writeFileSync(settingsPath, JSON.stringify({}));
 }
@@ -11,7 +10,7 @@ if (!fs.existsSync(settingsPath)) {
 function getGroupSettings(groupId) {
     try {
         const data = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
-        return data[groupId] || { antiLink: false }; // Default: Anti-link is OFF
+        return data[groupId] || { antiLink: false };
     } catch (error) {
         return { antiLink: false };
     }
