@@ -26,7 +26,7 @@ async function startBot() {
             } catch (err) {
                 console.error('Error requesting pairing code:', err);
             }
-        }, 3000);
+        }, 4000);
     }
 
     sock.ev.on('creds.update', saveCreds);
