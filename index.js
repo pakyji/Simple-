@@ -2,9 +2,11 @@ const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysocket
 const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
-const http = require('http'); // Aggiunto per tenere il server acceso su bot-hosting.net
+const http = require('http');
 
 async function startBot() {
+    console.log('Starting The Syndicate Bot...');
+    
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
     
     const sock = makeWASocket({
@@ -15,20 +17,25 @@ async function startBot() {
 
     if (!sock.authState.creds.registered) {
         const phoneNumber = "393802347902"; 
-        setTimeout(async () => {
+        try {
             let code = await sock.requestPairingCode(phoneNumber);
             console.log(`\n================================`);
             console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
             console.log(`================================\n`);
-        }, 4000);
+        } catch (err) {
+            console.error('Error requesting pairing code:', err);
+        }
     }
 
     sock.ev.on('creds.update', saveCreds);
     
     sock.ev.on('connection.update', (update) => {
-        const { connection } = update;
+        const { connection, lastDisconnect } = update;
         if (connection === 'open') {
             console.log('The Syndicate bot successfully connected to WhatsApp!');
+        } else if (connection === 'close') {
+            console.log('Connection closed, restarting bot...');
+            startBot();
         }
     });
 
@@ -80,7 +87,7 @@ async function startBot() {
 
 startBot();
 
-// HTTP Server Keep-Alive per evitare che bot-hosting.net spenga il bot
+// HTTP Server Keep-Alive to keep the container running 24/7 on bot-hosting.net
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('The Syndicate Bot is running 24/7!\n');
@@ -98,4 +105,4 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled rejection prevented: ', reason);
-});    
+});
