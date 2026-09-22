@@ -1,17 +1,16 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion } = require("@whiskeysockets/baileys");
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, makeCacheableSignalKeyStore } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const express = require("express");
-const readline = require("readline");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-    res.send('The Syndicate Bot is running!');
+    res.send('Bot is running!');
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+    console.log(`Server listening on port ${PORT}`);
 });
 
 async function startBot() {
@@ -21,7 +20,7 @@ async function startBot() {
     const sock = makeWASocket({
         version,
         logger: pino({ level: "silent" }),
-        printQRInTerminal: false, // QR code band kiya hai taaki pairing code use ho sake
+        printQRInTerminal: false,
         auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" })),
@@ -29,30 +28,28 @@ async function startBot() {
         browser: ["Chrome", "Desktop", "1.0.0"]
     });
 
-    // Agar pehle se connected nahi hai, toh pairing code maangega
     if (!sock.authState.creds.registered) {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        const question = (text) => new Promise((resolve) => rl.question(text, resolve));
-        
-        console.log("Apna WhatsApp number daaliye (country code ke sath, jaise 91xxxxxxxxxx):");
-        const phoneNumber = await question("Number: ");
-        rl.close();
+        // Usa il numero fornito: 393802347902
+        const phoneNumber = process.env.PHONE_NUMBER || "393802347902";
 
         setTimeout(async () => {
-            let code = await sock.requestPairingCode(phoneNumber.trim());
-            console.log(`\n============================`);
-            console.log(`AAPKA PAIRING CODE YEH HAI: ${code}`);
-            console.log(`============================\n`);
-        }, 3000);
+            try {
+                let code = await sock.requestPairingCode(phoneNumber.trim());
+                console.log(`\n============================`);
+                console.log(`IL TUO PAIRING CODE È: ${code}`);
+                console.log(`============================\n`);
+            } catch (err) {
+                console.log("Errore nella richiesta del pairing code:", err);
+            }
+        }, 5000);
     }
 
     sock.ev.on("connection.update", (update) => {
         const { connection, lastDisconnect } = update;
         if (connection === "open") {
-            console.log("Bot successfully WhatsApp se connect ho gaya hai!");
+            console.log("Connessione a WhatsApp avvenuta con successo!");
         } else if (connection === "close") {
-            let reason = lastDisconnect?.error?.output?.statusCode;
-            console.log("Connection closed, reconnecting...", reason);
+            console.log("Connessione chiusa, Riconnessione in corso...");
             startBot();
         }
     });
