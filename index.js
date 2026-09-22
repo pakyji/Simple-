@@ -17,7 +17,7 @@ async function startBot() {
         setTimeout(async () => {
             let code = await sock.requestPairingCode(phoneNumber);
             console.log(`\n================================`);
-            console.log(` IL TUO CODICE DI PAIRING È: ${code} `);
+            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
             console.log(`================================\n`);
         }, 4000);
     }
@@ -27,7 +27,7 @@ async function startBot() {
     sock.ev.on('connection.update', (update) => {
         const { connection } = update;
         if (connection === 'open') {
-            console.log('The Syndicate bot connesso a WhatsApp con successo!');
+            console.log('The Syndicate bot successfully connected to WhatsApp!');
         }
     });
 
@@ -78,3 +78,12 @@ async function startBot() {
 }
 
 startBot();
+
+// Prevent the bot from stopping unexpectedly due to uncaught errors
+process.on('uncaughtException', (err) => {
+    console.error('Caught exception (Crash prevented): ', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled rejection prevented: ', reason);
+});               
