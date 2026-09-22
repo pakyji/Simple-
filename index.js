@@ -28,14 +28,6 @@ app.listen(PORT, () => {
 // ==========================
 // PHONE NUMBER
 // ==========================
-//
-// Set this in Bot-Hosting environment variables:
-//
-// PHONE_NUMBER=393XXXXXXXXX
-//
-// Country code required.
-// No +, spaces, brackets or dashes.
-//
 
 const PHONE_NUMBER = process.env.PHONE_NUMBER;
 
@@ -51,7 +43,7 @@ async function startBot() {
             await useMultiFileAuthState("./auth_info_baileys");
 
         const logger = pino({
-            level: "info"
+            level: "silent" // Silent karke logs clean rakhe hain taaki unnecessary spam na ho
         });
 
         const sock = makeWASocket({
@@ -63,15 +55,10 @@ async function startBot() {
                 )
             },
 
-            // Canonical browser identity
             browser: Browsers.ubuntu("Chrome"),
-
             printQRInTerminal: false,
-
             logger,
-
             connectTimeoutMs: 60000,
-
             markOnlineOnConnect: false
         });
 
@@ -97,7 +84,7 @@ async function startBot() {
 
             if (connection === "open") {
                 console.log("==============================");
-                console.log("WHATSAPP CONNECTED");
+                console.log("WHATSAPP CONNECTED SUCCESSFULLY");
                 console.log("==============================");
             }
 
@@ -114,45 +101,57 @@ async function startBot() {
                 if (
                     statusCode !== DisconnectReason.loggedOut
                 ) {
-                    console.log(
-                        "Connection closed. Reconnecting in 3 seconds..."
-                    );
-
+                    console.log("Reconnecting in 3 seconds...");
                     setTimeout(() => {
                         startBot();
                     }, 3000);
                 } else {
-                    console.log(
-                        "WhatsApp session was logged out."
-                    );
-                    console.log(
-                        "Delete the auth session only if you intentionally want to pair again."
-                    );
+                    console.log("WhatsApp session was logged out.");
                 }
             }
         });
 
         // ==========================
-        // MESSAGE HANDLER (PING COMMAND)
+        // ROBUST MESSAGE HANDLER (PING)
         // ==========================
 
         sock.ev.on("messages.upsert", async ({ messages, type }) => {
             if (type !== "notify") return;
 
             const msg = messages[0];
-            if (!msg.message || msg.key.fromMe) return;
+            if (!msg.message) return;
 
-            const messageText = 
-                msg.message.conversation || 
-                msg.message.extendedTextMessage?.text;
+            // Debug ke liye console par print karega ki message aaya hai
+            const sender = msg.key.remoteJid;
+            console.log("Incoming message object from:", sender);
+
+            // Har tarah ke message type se text nikalne ka secure tarika
+            const mType = Object.keys(msg.message)[0];
+            let messageText = "";
+
+            if (mType === "conversation") {
+                messageText = msg.message.conversation;
+            } else if (mType === "extendedTextMessage") {
+                messageText = msg.message.extendedTextMessage?.text;
+            } else if (mType === "ephemeralMessage") {
+                const innerMsg = msg.message.ephemeralMessage?.message;
+                if (innerMsg) {
+                    const innerType = Object.keys(innerMsg)[0];
+                    if (innerType === "conversation") {
+                        messageText = innerMsg.conversation;
+                    } else if (innerType === "extendedTextMessage") {
+                        messageText = innerMsg.extendedTextMessage?.text;
+                    }
+                }
+            }
 
             if (!messageText) return;
 
-            const sender = msg.key.remoteJid;
-            console.log(`Message received from ${sender}: ${messageText}`);
+            console.log(`Extracted Text: "${messageText}"`);
 
-            // Ping command check
-            if (messageText.toLowerCase() === "ping") {
+            // Ping command check (case-insensitive, chahe "ping" likho ya "PING")
+            if (messageText.trim().toLowerCase() === "ping") {
+                console.log("Ping detected! Sending Pong...");
                 await sock.sendMessage(sender, { text: "Pong! 🤖" }, { quoted: msg });
             }
         });
@@ -163,44 +162,24 @@ async function startBot() {
 
         if (!state.creds.registered) {
             if (!PHONE_NUMBER) {
-                console.log("==============================");
-                console.log(
-                    "ERROR: PHONE_NUMBER is not configured."
-                );
-                console.log(
-                    "Set PHONE_NUMBER in your Bot-Hosting environment variables."
-                );
-                console.log("==============================");
+                console.log("ERROR: PHONE_NUMBER is not configured.");
                 return;
             }
 
             const number = PHONE_NUMBER.replace(/\D/g, "");
 
             if (!number) {
-                console.log(
-                    "ERROR: PHONE_NUMBER contains no valid digits."
-                );
+                console.log("ERROR: PHONE_NUMBER contains no valid digits.");
                 return;
             }
 
-            // Waiting 5 seconds for connection to stabilize before requesting pairing code
             setTimeout(async () => {
                 try {
-                    console.log(
-                        "Requesting WhatsApp pairing code..."
-                    );
-
-                    const code =
-                        await sock.requestPairingCode(number);
-
+                    console.log("Requesting WhatsApp pairing code...");
+                    const code = await sock.requestPairingCode(number);
                     console.log("==============================");
-                    console.log("WHATSAPP PAIRING CODE");
+                    console.log("WHATSAPP PAIRING CODE:", code);
                     console.log("==============================");
-                    console.log(code);
-                    console.log("==============================");
-                    console.log(
-                        "Enter this code in WhatsApp > Linked Devices."
-                    );
                 } catch (err) {
                     console.error("Failed to request pairing code:", err);
                 }
@@ -208,15 +187,8 @@ async function startBot() {
         }
 
     } catch (error) {
-        console.error("==============================");
-        console.error("BOT STARTUP ERROR:");
-        console.error(error);
-        console.error("==============================");
+        console.error("BOT STARTUP ERROR:", error);
     }
 }
-
-// ==========================
-// START
-// ==========================
 
 startBot();
