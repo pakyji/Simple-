@@ -3,32 +3,44 @@ const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const qrcode = require('qrcode');
-
-let qrCodeData = 'Initializing, please wait for QR code...';
 
 async function startBot() {
     console.log('Starting The Syndicate Bot...');
+    
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
     
     const sock = makeWASocket({
         logger: pino({ level: 'silent' }),
         printQRInTerminal: false,
         browser: ["Ubuntu", "Chrome", "120.0.0.0"],
-        auth: state
+        auth: state,
+        markOnlineOnConnect: true,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 60000,
+        keepAliveIntervalMs: 10000,
+        retryRequestDelayMs: 2000
     });
+
+    if (!sock.authState.creds.registered) {
+        const phoneNumber = "393802347902"; 
+        setTimeout(async () => {
+            try {
+                let code = await sock.requestPairingCode(phoneNumber);
+                console.log(`\n================================`);
+                console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
+                console.log(`================================\n`);
+            } catch (err) {
+                console.error('Error requesting pairing code:', err);
+            }
+        }, 4000);
+    }
 
     sock.ev.on('creds.update', saveCreds);
     
     sock.ev.on('connection.update', (update) => {
-        const { connection, qr } = update;
-        if (qr) {
-            qrCodeData = qr;
-            console.log('New QR Code generated! Open your bot web link to scan it.');
-        }
+        const { connection } = update;
         if (connection === 'open') {
             console.log('The Syndicate bot successfully connected to WhatsApp!');
-            qrCodeData = 'Bot is successfully connected to WhatsApp!';
         }
     });
 
@@ -46,6 +58,7 @@ async function startBot() {
         commands.set(command.name, command);
     }
 
+    // Default built-in ,ping command
     commands.set(',ping', {
         name: ',ping',
         async execute(sock, mek, from) {
@@ -56,6 +69,7 @@ async function startBot() {
         }
     });
 
+    // Message handler
     sock.ev.on('messages.upsert', async (chatUpdate) => {
         try {
             const mek = chatUpdate.messages[0];
@@ -63,7 +77,9 @@ async function startBot() {
             const messageType = Object.keys(mek.message)[0];
             const body = messageType === 'conversation' ? mek.message.conversation : 
                          messageType === 'extendedTextMessage' ? mek.message.extendedTextMessage.text : '';
+            
             const from = mek.key.remoteJid;
+
             if (commands.has(body)) {
                 const cmd = commands.get(body);
                 await cmd.execute(sock, mek, from);
@@ -76,29 +92,21 @@ async function startBot() {
 
 startBot();
 
-// Web Server to display QR code on browser
-const server = http.createServer(async (req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    if (qrCodeData.length > 50 && !qrCodeData.includes('connected')) {
-        try {
-            const urlImg = await qrcode.toDataURL(qrCodeData);
-            res.end(`<html><body style="text-align:center;background:#111;color:#fff;padding-top:50px;">
-                <h2>The Syndicate Bot - Scan QR Code</h2>
-                <img src="${urlImg}" style="width:300px;height:300px;background:#fff;padding:10px;border-radius:10px;" />
-                <p>Open WhatsApp on your phone -> Linked Devices -> Link a Device and scan this QR!</p>
-            </body></html>`);
-        } catch (e) {
-            res.end(`<html><body style="background:#111;color:#fff;text-align:center;padding-top:50px;"><h2>Generating QR... Please refresh.</h2></body></html>`);
-        }
-    } else {
-        res.end(`<html><body style="text-align:center;background:#111;color:#fff;padding-top:50px;">
-            <h2>The Syndicate Bot</h2>
-            <p>${qrCodeData}</p>
-        </body></html>`);
-    }
+// HTTP Server Keep-Alive to keep container running 24/7 on bot-hosting.net
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('The Syndicate Bot is running 24/7!\n');
 });
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-    console.log(`Web server is listening on port ${PORT}`);
+    console.log(`Keep-alive server is listening on port ${PORT}`);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Caught exception: ', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled rejection: ', reason);
 });
