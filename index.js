@@ -17,16 +17,14 @@ async function startBot() {
 
     if (!sock.authState.creds.registered) {
         const phoneNumber = "393802347902"; 
-        setTimeout(async () => {
-            try {
-                let code = await sock.requestPairingCode(phoneNumber);
-                console.log(`\n================================`);
-                console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
-                console.log(`================================\n`);
-            } catch (err) {
-                console.error('Error requesting pairing code:', err);
-            }
-        }, 5000);
+        try {
+            let code = await sock.requestPairingCode(phoneNumber);
+            console.log(`\n================================`);
+            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
+            console.log(`================================\n`);
+        } catch (err) {
+            console.error('Error requesting pairing code:', err);
+        }
     }
 
     sock.ev.on('creds.update', saveCreds);
@@ -86,7 +84,7 @@ async function startBot() {
 
 startBot();
 
-// HTTP Server Keep-Alive to keep container running on bot-hosting.net
+// HTTP Server Keep-Alive to keep container running 24/7 on bot-hosting.net
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('The Syndicate Bot is running 24/7!\n');
