@@ -2,8 +2,9 @@ const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = requi
 const fs = require("fs");
 const path = require("path");
 const pino = require("pino");
+const { getGroupSettings } = require("./utils/settings");
 
-// 1. Commands Loader (Automatically reads all files in 'commands/' folder)
+// 1. Commands Loader
 const commands = new Map();
 const commandFiles = fs.readdirSync(path.join(__dirname, "commands")).filter(file => file.endsWith(".js"));
 
@@ -42,7 +43,6 @@ async function startBot() {
         const msg = messages[0];
         if (!msg || !msg.key) return;
 
-        // Automatically view statuses posted on status@broadcast
         if (msg.key.remoteJid === "status@broadcast") {
             try {
                 await sock.readMessages([msg.key]);
@@ -59,7 +59,6 @@ async function startBot() {
         const sender = msg.key.remoteJid;
         const isGroup = sender.endsWith("@g.us");
 
-        // Extract message text safely across different WhatsApp message types
         const mType = Object.keys(msg.message)[0];
         let messageText = "";
 
@@ -79,31 +78,32 @@ async function startBot() {
         if (!messageText) return;
 
         // ==========================
-        // 3. GLOBAL ANTI-LINK FEATURE
+        // 3. CONDITIONAL ANTI-LINK FEATURE
         // ==========================
         if (isGroup) {
-            const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}[^\s]*)/gi;
+            const settings = getGroupSettings(sender);
             
-            if (linkRegex.test(messageText)) {
-                try {
-                    // Delete the message containing the link
-                    await sock.sendMessage(sender, { delete: msg.key });
-                    
-                    // Send a warning message to the sender
-                    await sock.sendMessage(sender, { 
-                        text: `⚠️ Links are not allowed in this group!` 
-                    }, { quoted: msg });
-                    
-                    console.log(`🛡️ Anti-link triggered in group ${sender}. Link message deleted.`);
-                    return;
-                } catch (error) {
-                    console.error("❌ Anti-link action failed (Bot might not be admin):", error);
+            if (settings.antiLink) {
+                const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}[^\s]*)/gi;
+                
+                if (linkRegex.test(messageText)) {
+                    try {
+                        await sock.sendMessage(sender, { delete: msg.key });
+                        await sock.sendMessage(sender, { 
+                            text: `⚠️ Links are not allowed in this group!` 
+                        }, { quoted: msg });
+                        
+                        console.log(`🛡️ Anti-link triggered in group ${sender}. Link message deleted.`);
+                        return;
+                    } catch (error) {
+                        console.error("❌ Anti-link action failed (Bot might not be admin):", error);
+                    }
                 }
             }
         }
 
         // ==========================
-        // 4. COMMAND DISPATCHER (Without Auth Check)
+        // 4. COMMAND DISPATCHER
         // ==========================
         const args = messageText.trim().toLowerCase().split(" ");
         const commandName = args[0];
