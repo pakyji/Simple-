@@ -22,10 +22,33 @@ async function startBot() {
     }
 
     sock.ev.on('creds.update', saveCreds);
+    
     sock.ev.on('connection.update', (update) => {
         const { connection } = update;
         if (connection === 'open') {
             console.log('Bot connesso a WhatsApp con successo!');
+        }
+    });
+
+    // ,ping command handler
+    sock.ev.on('messages.upsert', async (chatUpdate) => {
+        try {
+            const mek = chatUpdate.messages[0];
+            if (!mek.message) return;
+            const messageType = Object.keys(mek.message)[0];
+            const body = messageType === 'conversation' ? mek.message.conversation : 
+                         messageType === 'extendedTextMessage' ? mek.message.extendedTextMessage.text : '';
+            
+            const from = mek.key.remoteJid;
+
+            if (body === ',ping') {
+                const start = Date.now();
+                await sock.sendMessage(from, { text: 'Pong! 🏓' }, { quoted: mek });
+                const latency = Date.now() - start;
+                await sock.sendMessage(from, { text: `Speed: ${latency}ms` }, { quoted: mek });
+            }
+        } catch (err) {
+            console.log(err);
         }
     });
 }
