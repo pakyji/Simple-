@@ -4,7 +4,6 @@ module.exports = {
     name: "antilink",
     description: "Turns anti-link protection on or off for the group",
     execute: async (sock, msg, sender, args) => {
-        // Ensure this command is only used in groups
         if (!sender.endsWith("@g.us")) {
             await sock.sendMessage(sender, { text: "❌ This command can only be used inside groups!" }, { quoted: msg });
             return;
