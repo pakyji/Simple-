@@ -17,25 +17,24 @@ async function startBot() {
 
     if (!sock.authState.creds.registered) {
         const phoneNumber = "393802347902"; 
-        try {
-            let code = await sock.requestPairingCode(phoneNumber);
-            console.log(`\n================================`);
-            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
-            console.log(`================================\n`);
-        } catch (err) {
-            console.error('Error requesting pairing code:', err);
-        }
+        setTimeout(async () => {
+            try {
+                let code = await sock.requestPairingCode(phoneNumber);
+                console.log(`\n================================`);
+                console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
+                console.log(`================================\n`);
+            } catch (err) {
+                console.error('Error requesting pairing code:', err);
+            }
+        }, 5000);
     }
 
     sock.ev.on('creds.update', saveCreds);
     
     sock.ev.on('connection.update', (update) => {
-        const { connection, lastDisconnect } = update;
+        const { connection } = update;
         if (connection === 'open') {
             console.log('The Syndicate bot successfully connected to WhatsApp!');
-        } else if (connection === 'close') {
-            console.log('Connection closed, restarting bot...');
-            startBot();
         }
     });
 
@@ -87,7 +86,7 @@ async function startBot() {
 
 startBot();
 
-// HTTP Server Keep-Alive to keep the container running 24/7 on bot-hosting.net
+// HTTP Server Keep-Alive to keep container running on bot-hosting.net
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('The Syndicate Bot is running 24/7!\n');
@@ -98,11 +97,10 @@ server.listen(PORT, () => {
     console.log(`Keep-alive server is listening on port ${PORT}`);
 });
 
-// Prevent the bot from stopping unexpectedly due to uncaught errors
 process.on('uncaughtException', (err) => {
-    console.error('Caught exception (Crash prevented): ', err);
+    console.error('Caught exception: ', err);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled rejection prevented: ', reason);
+    console.error('Unhandled rejection: ', reason);
 });
