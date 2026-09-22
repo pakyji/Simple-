@@ -1,7 +1,6 @@
 {
   "name": "the-syndicate",
   "version": "1.0.0",
-  "description": "WhatsApp Bot The Syndicate",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
