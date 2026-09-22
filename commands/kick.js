@@ -49,10 +49,14 @@ module.exports = {
                 return;
             }
 
+            const userNumber = targetJid.split("@")[0];
             await sock.groupParticipantsUpdate(sender, [targetJid], "remove");
-            await sock.sendMessage(sender, { text: `✅ Successfully removed @${targetJid.split("@")[0]} from the group.`, mentions: [targetJid] }, { quoted: msg });
+            await sock.sendMessage(sender, { 
+                text: "✅ Successfully removed @" + userNumber + " from the group.", 
+                mentions: [targetJid] 
+            }, { quoted: msg });
             
-            console.log(`👢 Kicked user ${targetJid} from group ${sender}`);
+            console.log("👢 Kicked user " + targetJid + " from group " + sender);
         } catch (error) {
             console.error("❌ Error executing kick command:", error);
             await sock.sendMessage(sender, { text: "❌ Failed to kick the user. Make sure bot has proper admin permissions." }, { quoted: msg });
