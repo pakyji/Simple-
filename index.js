@@ -29,9 +29,9 @@ async function startBot() {
     });
 
     if (!sock.authState.creds.registered) {
-        // Usa il numero fornito: 393802347902
-        const phoneNumber = process.env.PHONE_NUMBER || "393802347902";
-
+        // Number bina '+' ke rakha hai
+        const phoneNumber = "393802347902";
+        
         setTimeout(async () => {
             try {
                 let code = await sock.requestPairingCode(phoneNumber.trim());
