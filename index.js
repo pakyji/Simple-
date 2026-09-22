@@ -82,7 +82,22 @@ async function startBot() {
     });
 }
 
-startBot();
+startBot(    const sock = makeWASocket({
+        logger: pino({ level: 'silent' }),
+        printQRInTerminal: false,
+        auth: state
+    });
+
+    if (!sock.authState.creds.registered) {
+        const phoneNumber = "393802347902"; 
+        setTimeout(async () => {
+            let code = await sock.requestPairingCode(phoneNumber);
+            console.log(`\n================================`);
+            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
+            console.log(`================================\n`);
+        }, 3000);
+                      }
+        );
 
 // HTTP Server Keep-Alive to keep container running 24/7 on bot-hosting.net
 const server = http.createServer((req, res) => {
