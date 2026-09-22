@@ -5,24 +5,11 @@ module.exports = {
         const ownerText = `
 ╭━━━〔 *👑 BOT OWNER & COMMUNITY* 〕━━━
 ┃ 
-┃ 🤖 Bot Developer / Owner
+┃ 🤖 Bot Developer / join us
 ┃ 💬 Discord Server: https://discord.gg/syndicateps
 ┃ 
 ╰━━━━━━━━━━━━━━━━━━━━━━━`.trim();
 
-        try {
-            // Bina fetch ke direct URL object pass kar rahe hain
-            await sock.sendMessage(
-                sender, 
-                { 
-                    image: { url: "https://i.imgur.com/05xbdqS.jpeg" }, 
-                    caption: ownerText 
-                }, 
-                { quoted: msg }
-            );
-        } catch (error) {
-            console.error("Owner command error:", error);
-            await sock.sendMessage(sender, { text: ownerText }, { quoted: msg });
-        }
+        await sock.sendMessage(sender, { text: ownerText }, { quoted: msg });
     }
 };
