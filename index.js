@@ -133,6 +133,31 @@ async function startBot() {
         });
 
         // ==========================
+        // MESSAGE HANDLER (PING COMMAND)
+        // ==========================
+
+        sock.ev.on("messages.upsert", async ({ messages, type }) => {
+            if (type !== "notify") return;
+
+            const msg = messages[0];
+            if (!msg.message || msg.key.fromMe) return;
+
+            const messageText = 
+                msg.message.conversation || 
+                msg.message.extendedTextMessage?.text;
+
+            if (!messageText) return;
+
+            const sender = msg.key.remoteJid;
+            console.log(`Message received from ${sender}: ${messageText}`);
+
+            // Ping command check
+            if (messageText.toLowerCase() === "ping") {
+                await sock.sendMessage(sender, { text: "Pong! 🤖" }, { quoted: msg });
+            }
+        });
+
+        // ==========================
         // PAIRING CODE
         // ==========================
 
