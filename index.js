@@ -158,21 +158,28 @@ async function startBot() {
                 return;
             }
 
-            console.log(
-                "Requesting WhatsApp pairing code..."
-            );
+            // Waiting 5 seconds for connection to stabilize before requesting pairing code
+            setTimeout(async () => {
+                try {
+                    console.log(
+                        "Requesting WhatsApp pairing code..."
+                    );
 
-            const code =
-                await sock.requestPairingCode(number);
+                    const code =
+                        await sock.requestPairingCode(number);
 
-            console.log("==============================");
-            console.log("WHATSAPP PAIRING CODE");
-            console.log("==============================");
-            console.log(code);
-            console.log("==============================");
-            console.log(
-                "Enter this code in WhatsApp > Linked Devices."
-            );
+                    console.log("==============================");
+                    console.log("WHATSAPP PAIRING CODE");
+                    console.log("==============================");
+                    console.log(code);
+                    console.log("==============================");
+                    console.log(
+                        "Enter this code in WhatsApp > Linked Devices."
+                    );
+                } catch (err) {
+                    console.error("Failed to request pairing code:", err);
+                }
+            }, 5000);
         }
 
     } catch (error) {
