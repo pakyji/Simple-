@@ -1,7 +1,6 @@
 const {
     default: makeWASocket,
     useMultiFileAuthState,
-    fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
     DisconnectReason
 } = require("@whiskeysockets/baileys");
@@ -9,12 +8,12 @@ const {
 const pino = require("pino");
 const express = require("express");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 // =========================
 // WEB SERVER
 // =========================
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
     res.send("Bot is running!");
@@ -25,29 +24,38 @@ app.listen(PORT, () => {
 });
 
 // =========================
+// LOGGER
+// =========================
+
+const logger = pino({
+    level: "info"
+});
+
+// =========================
+// BOT STATE
+// =========================
+
+let reconnecting = false;
+
+// =========================
 // WHATSAPP BOT
 // =========================
 
 async function startBot() {
     try {
-        console.log("Starting WhatsApp connection...");
+        console.log("");
+        console.log("================================");
+        console.log("STARTING WHATSAPP BOT");
+        console.log("================================");
 
         const { state, saveCreds } =
             await useMultiFileAuthState("./auth_info_baileys");
 
-        const { version } = await fetchLatestBaileysVersion();
-
         console.log(
-            `Using WhatsApp Web version: ${version.join(".")}`
+            `Authentication registered: ${state.creds.registered}`
         );
 
-        const logger = pino({
-            level: "info"
-        });
-
         const sock = makeWASocket({
-            version,
-
             logger,
 
             printQRInTerminal: false,
@@ -60,42 +68,49 @@ async function startBot() {
                 )
             },
 
-            // Use a normal WhatsApp Web browser identity.
-            browser: ["Chrome", "Linux", "1.0.0"],
+            browser: [
+                "Chrome",
+                "Linux",
+                "1.0.0"
+            ],
 
             connectTimeoutMs: 60000,
 
-            markOnlineOnConnect: false
+            defaultQueryTimeoutMs: 60000,
+
+            keepAliveIntervalMs: 30000,
+
+            markOnlineOnConnect: false,
+
+            syncFullHistory: false
         });
 
         // =========================
-        // SAVE AUTH CREDENTIALS
+        // SAVE CREDENTIALS
         // =========================
 
         sock.ev.on("creds.update", saveCreds);
 
         // =========================
-        // CONNECTION EVENTS
+        // CONNECTION UPDATE
         // =========================
 
         sock.ev.on("connection.update", async (update) => {
             const {
                 connection,
-                lastDisconnect,
-                qr
+                lastDisconnect
             } = update;
 
-            if (qr) {
+            if (connection === "connecting") {
                 console.log(
-                    "WhatsApp socket is ready for pairing code."
+                    "Connecting to WhatsApp..."
                 );
             }
 
-            if (connection === "connecting") {
-                console.log("Connecting to WhatsApp...");
-            }
-
             if (connection === "open") {
+                reconnecting = false;
+
+                console.log("");
                 console.log(
                     "================================"
                 );
@@ -105,12 +120,18 @@ async function startBot() {
                 console.log(
                     "================================"
                 );
+                console.log("");
             }
 
             if (connection === "close") {
                 const statusCode =
                     lastDisconnect?.error?.output?.statusCode;
 
+                const errorMessage =
+                    lastDisconnect?.error?.message ||
+                    "Unknown connection error";
+
+                console.log("");
                 console.log(
                     "================================"
                 );
@@ -118,35 +139,51 @@ async function startBot() {
                     "WHATSAPP CONNECTION CLOSED"
                 );
                 console.log(
-                    `Disconnect status code: ${statusCode || "unknown"}`
+                    `Disconnect status code: ${
+                        statusCode || "unknown"
+                    }`
                 );
                 console.log(
-                    `Disconnect error: ${
-                        lastDisconnect?.error?.message ||
-                        "unknown"
-                    }`
+                    `Disconnect error: ${errorMessage}`
                 );
                 console.log(
                     "================================"
                 );
 
-                if (
-                    statusCode !== DisconnectReason.loggedOut
-                ) {
-                    console.log(
-                        "Reconnecting to WhatsApp..."
-                    );
+                // =========================
+                // LOGGED OUT
+                // =========================
 
-                    setTimeout(() => {
-                        startBot();
-                    }, 5000);
-                } else {
+                if (
+                    statusCode ===
+                    DisconnectReason.loggedOut
+                ) {
                     console.log(
                         "WhatsApp session was logged out."
                     );
+
                     console.log(
-                        "Delete the auth_info_baileys folder only if a fresh pairing is required."
+                        "Delete auth_info_baileys only when a fresh pairing is required."
                     );
+
+                    return;
+                }
+
+                // =========================
+                // RECONNECT
+                // =========================
+
+                if (!reconnecting) {
+                    reconnecting = true;
+
+                    console.log(
+                        "Reconnecting in 5 seconds..."
+                    );
+
+                    setTimeout(() => {
+                        reconnecting = false;
+                        startBot();
+                    }, 5000);
                 }
             }
         });
@@ -156,19 +193,25 @@ async function startBot() {
         // =========================
 
         if (!state.creds.registered) {
-            const phoneNumber =
-                process.env.WHATSAPP_NUMBER || "YOUR_NUMBER_HERE";
+            const rawNumber =
+                process.env.WHATSAPP_NUMBER || "";
 
-            if (
-                !phoneNumber ||
-                phoneNumber === "YOUR_NUMBER_HERE"
-            ) {
+            const phoneNumber =
+                rawNumber.replace(/\D/g, "");
+
+            if (!phoneNumber) {
+                console.log("");
                 console.log(
                     "ERROR: WHATSAPP_NUMBER is not configured."
                 );
+                console.log(
+                    "Set WHATSAPP_NUMBER to the full international phone number."
+                );
+                console.log("");
                 return;
             }
 
+            console.log("");
             console.log(
                 "Requesting WhatsApp pairing code..."
             );
@@ -176,7 +219,7 @@ async function startBot() {
             try {
                 const code =
                     await sock.requestPairingCode(
-                        phoneNumber.replace(/\D/g, "")
+                        phoneNumber
                     );
 
                 console.log("");
@@ -197,26 +240,36 @@ async function startBot() {
                 );
                 console.log("");
             } catch (error) {
+                console.error("");
                 console.error(
                     "PAIRING CODE ERROR:"
                 );
                 console.error(error);
+                console.error("");
             }
         } else {
+            console.log("");
             console.log(
                 "Existing WhatsApp credentials found."
             );
             console.log(
                 "Pairing code is not required."
             );
+            console.log("");
         }
 
     } catch (error) {
+        console.error("");
         console.error(
             "BOT STARTUP ERROR:"
         );
         console.error(error);
+        console.error("");
     }
 }
+
+// =========================
+// START
+// =========================
 
 startBot();
