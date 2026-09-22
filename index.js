@@ -85,7 +85,6 @@ async function startBot() {
             const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}[^\s]*)/gi;
             
             if (linkRegex.test(messageText)) {
-                // Optional: Check if bot is admin before trying to delete, or just warn the user
                 try {
                     // Delete the message containing the link
                     await sock.sendMessage(sender, { delete: msg.key });
@@ -96,7 +95,7 @@ async function startBot() {
                     }, { quoted: msg });
                     
                     console.log(`🛡️ Anti-link triggered in group ${sender}. Link message deleted.`);
-                    return; // Stop further command processing for link messages
+                    return;
                 } catch (error) {
                     console.error("❌ Anti-link action failed (Bot might not be admin):", error);
                 }
@@ -104,22 +103,12 @@ async function startBot() {
         }
 
         // ==========================
-        // 4. COMMAND DISPATCHER & AUTH CHECK
+        // 4. COMMAND DISPATCHER (Without Auth Check)
         // ==========================
         const args = messageText.trim().toLowerCase().split(" ");
         const commandName = args[0];
 
         if (commands.has(commandName)) {
-            const { isApproved } = require("./utils/auth");
-
-            // Block unverified users except for the 'verify' command
-            if (commandName !== "verify" && !isApproved(sender)) {
-                await sock.sendMessage(sender, { 
-                    text: "⚠️ Access Denied!\n\nYou must join our official Discord community before using this bot.\n\n🔗 Join here: https://discord.gg/syndicateps\n\nAfter joining, type `.verify` to unlock access." 
-                }, { quoted: msg });
-                return;
-            }
-
             try {
                 console.log(`⚡ Executing command: ${commandName}`);
                 await commands.get(commandName).execute(sock, msg, sender, args);
