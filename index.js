@@ -1,18 +1,19 @@
 const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const pino = require('pino');
+const fs = require('fs');
+const path = require('path');
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
     
     const sock = makeWASocket({
         logger: pino({ level: 'silent' }),
-        printQRInTerminal: false, // Disattiva il QR code
+        printQRInTerminal: false,
         auth: state
     });
 
-    // Se non è già registrato, richiede il codice con il tuo numero
     if (!sock.authState.creds.registered) {
-        const phoneNumber = "393802347902"; // Il tuo numero senza il segno '+'
+        const phoneNumber = "393802347902"; 
         setTimeout(async () => {
             let code = await sock.requestPairingCode(phoneNumber);
             console.log(`\n================================`);
@@ -26,11 +27,36 @@ async function startBot() {
     sock.ev.on('connection.update', (update) => {
         const { connection } = update;
         if (connection === 'open') {
-            console.log('Bot connesso a WhatsApp con successo!');
+            console.log('The Syndicate bot connesso a WhatsApp con successo!');
         }
     });
 
-    // ,ping command handler
+    // Commands loader map
+    const commands = new Map();
+    const commandFolder = path.join(__dirname, 'commands');
+
+    if (!fs.existsSync(commandFolder)) {
+        fs.mkdirSync(commandFolder);
+    }
+
+    const commandFiles = fs.readdirSync(commandFolder).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const command = require(path.join(commandFolder, file));
+        commands.set(command.name, command);
+    }
+
+    // Default built-in ,ping command
+    commands.set(',ping', {
+        name: ',ping',
+        async execute(sock, mek, from) {
+            const start = Date.now();
+            await sock.sendMessage(from, { text: 'The Syndicate Pong! 🏓' }, { quoted: mek });
+            const latency = Date.now() - start;
+            await sock.sendMessage(from, { text: `The Syndicate Speed: ${latency}ms` }, { quoted: mek });
+        }
+    });
+
+    // Message handler
     sock.ev.on('messages.upsert', async (chatUpdate) => {
         try {
             const mek = chatUpdate.messages[0];
@@ -41,11 +67,9 @@ async function startBot() {
             
             const from = mek.key.remoteJid;
 
-            if (body === ',ping') {
-                const start = Date.now();
-                await sock.sendMessage(from, { text: 'Pong! 🏓' }, { quoted: mek });
-                const latency = Date.now() - start;
-                await sock.sendMessage(from, { text: `Speed: ${latency}ms` }, { quoted: mek });
+            if (commands.has(body)) {
+                const cmd = commands.get(body);
+                await cmd.execute(sock, mek, from);
             }
         } catch (err) {
             console.log(err);
