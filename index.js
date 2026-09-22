@@ -9,6 +9,8 @@ const {
 const { Boom } = require("@hapi/boom");
 const pino = require("pino");
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 
 // ==========================
 // WEB SERVER
@@ -43,7 +45,7 @@ async function startBot() {
             await useMultiFileAuthState("./auth_info_baileys");
 
         const logger = pino({
-            level: "silent" // Silent karke logs clean rakhe hain taaki unnecessary spam na ho
+            level: "silent"
         });
 
         const sock = makeWASocket({
@@ -112,7 +114,26 @@ async function startBot() {
         });
 
         // ==========================
-        // ROBUST MESSAGE HANDLER (PING)
+        // COMMAND LOADER SETUP
+        // ==========================
+
+        const commands = new Map();
+        const commandsPath = path.join(__dirname, "commands");
+
+        if (fs.existsSync(commandsPath)) {
+            const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".js"));
+            for (const file of commandFiles) {
+                const filePath = path.join(commandsPath, file);
+                const command = require(filePath);
+                if (command.name) {
+                    commands.set(command.name, command);
+                    console.log(`Loaded command: ${command.name}`);
+                }
+            }
+        }
+
+        // ==========================
+        // MESSAGE HANDLER (MODULAR)
         // ==========================
 
         sock.ev.on("messages.upsert", async ({ messages, type }) => {
@@ -121,11 +142,7 @@ async function startBot() {
             const msg = messages[0];
             if (!msg.message) return;
 
-            // Debug ke liye console par print karega ki message aaya hai
             const sender = msg.key.remoteJid;
-            console.log("Incoming message object from:", sender);
-
-            // Har tarah ke message type se text nikalne ka secure tarika
             const mType = Object.keys(msg.message)[0];
             let messageText = "";
 
@@ -137,22 +154,24 @@ async function startBot() {
                 const innerMsg = msg.message.ephemeralMessage?.message;
                 if (innerMsg) {
                     const innerType = Object.keys(innerMsg)[0];
-                    if (innerType === "conversation") {
-                        messageText = innerMsg.conversation;
-                    } else if (innerType === "extendedTextMessage") {
-                        messageText = innerMsg.extendedTextMessage?.text;
-                    }
+                    if (innerType === "conversation") messageText = innerMsg.conversation;
+                    else if (innerType === "extendedTextMessage") messageText = innerMsg.extendedTextMessage?.text;
                 }
             }
 
             if (!messageText) return;
 
-            console.log(`Extracted Text: "${messageText}"`);
+            const args = messageText.trim().toLowerCase().split(" ");
+            const commandName = args[0];
 
-            // Ping command check (case-insensitive, chahe "ping" likho ya "PING")
-            if (messageText.trim().toLowerCase() === "ping") {
-                console.log("Ping detected! Sending Pong...");
-                await sock.sendMessage(sender, { text: "Pong! 🤖" }, { quoted: msg });
+            if (commands.has(commandName)) {
+                try {
+                    console.log(`Executing command: ${commandName}`);
+                    await commands.get(commandName).execute(sock, msg, sender, args);
+                } catch (error) {
+                    console.error(`Error executing ${commandName}:`, error);
+                    await sock.sendMessage(sender, { text: "❌ An error occurred while executing this command." }, { quoted: msg });
+                }
             }
         });
 
