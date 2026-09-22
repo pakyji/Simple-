@@ -17,14 +17,16 @@ async function startBot() {
 
     if (!sock.authState.creds.registered) {
         const phoneNumber = "393802347902"; 
-        try {
-            let code = await sock.requestPairingCode(phoneNumber);
-            console.log(`\n================================`);
-            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
-            console.log(`================================\n`);
-        } catch (err) {
-            console.error('Error requesting pairing code:', err);
-        }
+        setTimeout(async () => {
+            try {
+                let code = await sock.requestPairingCode(phoneNumber);
+                console.log(`\n================================`);
+                console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
+                console.log(`================================\n`);
+            } catch (err) {
+                console.error('Error requesting pairing code:', err);
+            }
+        }, 3000);
     }
 
     sock.ev.on('creds.update', saveCreds);
@@ -82,22 +84,7 @@ async function startBot() {
     });
 }
 
-startBot(    const sock = makeWASocket({
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: false,
-        auth: state
-    });
-
-    if (!sock.authState.creds.registered) {
-        const phoneNumber = "393802347902"; 
-        setTimeout(async () => {
-            let code = await sock.requestPairingCode(phoneNumber);
-            console.log(`\n================================`);
-            console.log(` THE SYNDICATE PAIRING CODE: ${code} `);
-            console.log(`================================\n`);
-        }, 3000);
-                      }
-        );
+startBot();
 
 // HTTP Server Keep-Alive to keep container running 24/7 on bot-hosting.net
 const server = http.createServer((req, res) => {
@@ -116,4 +103,4 @@ process.on('uncaughtException', (err) => {
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled rejection: ', reason);
-});
+}
