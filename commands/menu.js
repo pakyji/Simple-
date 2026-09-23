@@ -20,7 +20,7 @@ module.exports = {
             }
         }
 
-        // Complete Multi-language dictionary for all commands & categories
+        // Mukammal Multi-language dictionary (EN, IT, UR)
         const translations = {
             en: {
                 title: "MAIN MENU",
@@ -36,7 +36,41 @@ module.exports = {
                     "99names": "Get one of the 99 Beautiful Names of Allah",
                     anon: "Send an anonymous message to someone",
                     antilink: "Enable or disable anti-link protection in the group",
-                    ascii: "Convert text into ASCII cool stylish art"
+                    ascii: "Convert text into ASCII cool stylish art",
+                    broadcast: "Broadcast message to all chats while excluding specific JIDs",
+                    calc: "Perform mathematical calculations",
+                    cat: "Get a random cute cat image",
+                    clear: "Delete a specific message by replying to it",
+                    dog: "Get a random cute dog image",
+                    dua: "Get a daily Islamic Dua",
+                    fact: "Get a random interesting fact",
+                    fancy: "Convert normal text into stylish fonts and decorations",
+                    flip: "Flip text upside down",
+                    gennum: "Generate a mock/dummy phone number for a specific country",
+                    gta: "Get the latest GTA Online weekly update details and bonuses",
+                    hack: "Run a fake funny hacking simulation",
+                    hadith: "Get a random Hadith",
+                    hidetag: "Tag all group members invisibly with a message",
+                    islamicdate: "Get current Hijri/Islamic date",
+                    meme: "Get a random funny meme",
+                    owner: "Shows the bot community link",
+                    pickup: "Get a funny pickup line",
+                    ping: "Check bot latency and response speed with funny remarks",
+                    poll: "Create a voting poll",
+                    prefix: "Change the command prefix of the bot",
+                    quote: "Get an inspirational quote",
+                    quran: "Get a random Quranic Ayah translation",
+                    roast: "Send a light, funny roast",
+                    sticker: "Convert any image into a WhatsApp sticker",
+                    style: "Convert text or names into stylish fonts",
+                    tagall: "Mention all members in the group",
+                    take: "Steal or rename a sticker's pack name and author",
+                    time: "Get live time, code, and weather for any country",
+                    translate: "Translate text to any language",
+                    url: "Convert an image into a public URL",
+                    vaporwave: "Convert text to aesthetic vaporwave style",
+                    weather: "Get real-time weather details for any city",
+                    ytmp3: "Download audio from YouTube video links"
                 }
             },
             it: {
@@ -53,7 +87,41 @@ module.exports = {
                     "99names": "Ottieni uno dei 99 Bellissimi Nomi di Allah",
                     anon: "Invia un messaggio anonimo a qualcuno",
                     antilink: "Abilita o disabilita la protezione anti-link nel gruppo",
-                    ascii: "Converti il testo in fantastica grafica ASCII"
+                    ascii: "Converti il testo in fantastica grafica ASCII",
+                    broadcast: "Invia un messaggio broadcast a tutte le chat",
+                    calc: "Esegui calcoli matematici",
+                    cat: "Ottieni un'immagine di un gattino carino",
+                    clear: "Elimina un messaggio specifico rispondendovi",
+                    dog: "Ottieni un'immagine di un cane carino",
+                    dua: "Ottieni una Dua islamica giornaliera",
+                    fact: "Ottieni un fatto interessante casuale",
+                    fancy: "Converti il testo normale in caratteri e decorazioni eleganti",
+                    flip: "Capovolgi il testo sottosopra",
+                    gennum: "Genera un numero di telefono fittizio per un paese specifico",
+                    gta: "Ottieni gli ultimi aggiornamenti e bonus settimanali di GTA Online",
+                    hack: "Esegui una finta simulazione di hacking divertente",
+                    hadith: "Ottieni un Hadith casuale",
+                    hidetag: "Tagga tutti i membri del gruppo in modo invisibile",
+                    islamicdate: "Ottieni la data islamica/Hijri corrente",
+                    meme: "Ottieni un meme divertente casuale",
+                    owner: "Mostra il link della community del bot",
+                    pickup: "Ottieni una frase di corteggiamento divertente",
+                    ping: "Verifica la latenza e la velocità di risposta del bot",
+                    poll: "Crea un sondaggio di voto",
+                    prefix: "Modifica il prefisso dei comandi del bot",
+                    quote: "Ottieni una citazione stimolante",
+                    quran: "Ottieni la traduzione casuale di un versetto coranico",
+                    roast: "Invia un arrosto leggero e divertente",
+                    sticker: "Converti qualsiasi immagine in un adesivo WhatsApp",
+                    style: "Converti testo o nomi in caratteri eleganti",
+                    tagall: "Menziona tutti i membri nel gruppo",
+                    take: "Ottieni o rinomina il pacchetto e l'autore di un adesivo",
+                    time: "Ottieni ora, codice e meteo in tempo reale per qualsiasi paese",
+                    translate: "Traduci il testo in qualsiasi lingua",
+                    url: "Converti un'immagine in un URL pubblico",
+                    vaporwave: "Converti il testo in stile estetico vaporwave",
+                    weather: "Ottieni dettagli meteorologici in tempo reale per qualsiasi città",
+                    ytmp3: "Scarica l'audio dai link video di YouTube"
                 }
             },
             ur: {
@@ -70,7 +138,41 @@ module.exports = {
                     "99names": "اللہ کے 99 پیارے ناموں میں سے ایک حاصل کریں",
                     anon: "کسی کو گمنام پیغام بھیجیں",
                     antilink: "گروپ میں اینٹی لنک پروٹیکشن آن یا آف کریں",
-                    ascii: "ٹیکسٹ کو خوبصورت ASCII آرٹ میں تبدیل کریں"
+                    ascii: "ٹیکسٹ کو خوبصورت ASCII آرٹ میں تبدیل کریں",
+                    broadcast: "تمام چیٹس میں براڈکاسٹ پیغام بھیجیں",
+                    calc: "ریاضی کے حساب کتاب کریں",
+                    cat: "بلی کی ایک پیاری تصویر حاصل کریں",
+                    clear: "کسی پیغام کا جواب دے کر اسے ڈیلیٹ کریں",
+                    dog: "کتے کی ایک پیاری تصویر حاصل کریں",
+                    dua: "روزانہ کی اسلامی دعا حاصل کریں",
+                    fact: "ایک دلچسپ حقیقت حاصل کریں",
+                    fancy: "عام ٹیکسٹ کو اسٹائلش فونٹس میں بدلیں",
+                    flip: "ٹیکسٹ کو الٹا کریں",
+                    gennum: "مخصوص ملک کا نقلی فون نمبر بنائیں",
+                    gta: "GTA Online کی ہفتہ وار اپڈیٹس اور بونس حاصل کریں",
+                    hack: "جعلی اور مزاحیہ ہیکنگ سیمুলেشن چلائیں",
+                    hadith: "ایک مبارک حدیث حاصل کریں",
+                    hidetag: "گروپ کے تمام ممبران کو پوشیدہ طور پر ٹیگ کریں",
+                    islamicdate: "موجودہ ہجری/اسلامی تاریخ معلوم کریں",
+                    meme: "ایک مزاحیہ میم حاصل کریں",
+                    owner: "بوٹ کمیونٹی کا لنک دیکھیں",
+                    pickup: "ایک مزاحیہ پک اپ لائن حاصل کریں",
+                    ping: "بوٹ کی رفتار اور لیٹنسی چیک کریں",
+                    poll: "ووٹنگ پول بنائیں",
+                    prefix: "بوٹ کا کمانڈ پریفکس تبدیل کریں",
+                    quote: "ایک متاثر کن قول حاصل کریں",
+                    quran: "قرآن پاک کی آیت کا ترجمہ حاصل کریں",
+                    roast: "ایک ہلکا پھلکا اور مزاحیہ روسٹ بھیجیں",
+                    sticker: "کسی بھی تصویر کو واٹس ایپ اسٹیکر میں بدلیں",
+                    style: "ٹیکسٹ کو اسٹائلش فونٹس میں بدلیں",
+                    tagall: "گروپ کے تمام ممبران کو مینشن کریں",
+                    take: "اسٹیکر کا پ্যাক نام اور مصنف تبدیل کریں",
+                    time: "کسی بھی ملک کا لائیو وقت اور موسم معلوم کریں",
+                    translate: "کسی بھی زبان میں متن کا ترجمہ کریں",
+                    url: "تصویر کو پبلک یو آر ایل میں تبدیل کریں",
+                    vaporwave: "ٹیکسٹ کو ویپورویو اسٹائل میں بدلیں",
+                    weather: "کسی بھی شہر کا موسم معلوم کریں",
+                    ytmp3: "یوٹیوب ویڈیو سے آڈیو ڈاؤن لوڈ کریں"
                 }
             }
         };
@@ -93,7 +195,7 @@ module.exports = {
                             const cat = t.categories[rawCat] || rawCat;
                             if (!categories[cat]) categories[cat] = [];
                             
-                            // Smart translation lookup with fallback to command file description
+                            // Smart translation lookup
                             let desc = t.descriptions[command.name] || command.description || "";
                             
                             categories[cat].push({ name: command.name, description: desc });
