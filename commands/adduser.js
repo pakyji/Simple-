@@ -1,5 +1,5 @@
 const fs = require("fs");
-const path = pathModuleSetup();
+const path = require("path");
 const langs = require("../languages");
 
 module.exports = {
@@ -71,8 +71,4 @@ module.exports = {
             await sock.sendMessage(sender, { text: `*ERROR:* Failed to save user number.` }, { quoted: msg });
         }
     }
-};
-
-function pathModuleSetup() {
-    return require("path");
-    }
+}; 
