@@ -15,7 +15,7 @@ module.exports = {
         try {
             // Check if the command is executed inside a WhatsApp group chat (@g.us)
             if (!sender.endsWith("@g.us")) {
-                await sock.sendMessage(sender, { text: "❌ This command can only be used inside groups!" }, { quoted: msg });
+                await sock.sendMessage(sender, { text: "This command can only be used inside groups." }, { quoted: msg });
                 return;
             }
 
@@ -26,57 +26,32 @@ module.exports = {
             if (action === "on") {
                 antiLinkGroups.add(sender);
                 await sock.sendMessage(sender, { 
-                    text: `╭━━━〔 🛡️ *ANTI-LINK* 🛡️ 〕━━━⣣\n` +
-                          `┃\n` +
-                          `┃  ✅ *Status:* Enabled successfully!\n` +
-                          `┃  ⚠️ Links will now be monitored and deleted.\n` +
-                          `┃\n` +
-                          `┣──────────────────────────┫\n` +
-                          `┃\n` +
-                          `┃  🔗 *Discord Community:*\n` +
-                          `┃  https://discord.gg/syndicateps\n` +
-                          `┃\n` +
-                          `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭` 
+                    text: 
+                        `Anti-Link Status: Enabled\n` +
+                        `Links will now be monitored and deleted.`
                 }, { quoted: msg });
             } 
             // Handle 'off' action to disable anti-link
             else if (action === "off") {
                 antiLinkGroups.delete(sender);
                 await sock.sendMessage(sender, { 
-                    text: `╭━━━〔 🛡️ *ANTI-LINK* 🛡️ 〕━━━⣣\n` +
-                          `┃\n` +
-                          `┃  ❌ *Status:* Disabled successfully!\n` +
-                          `┃\n` +
-                          `┣──────────────────────────┫\n` +
-                          `┃\n` +
-                          `┃  🔗 *Discord Community:*\n` +
-                          `┃  https://discord.gg/syndicateps\n` +
-                          `┃\n` +
-                          `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭` 
+                    text: `Anti-Link Status: Disabled`
                 }, { quoted: msg });
             } 
             // If no valid action argument is provided, show current status and usage instructions
             else {
-                const status = antiLinkGroups.has(sender) ? "Enabled 🟢" : "Disabled 🔴";
+                const status = antiLinkGroups.has(sender) ? "Enabled" : "Disabled";
                 await sock.sendMessage(sender, { 
-                    text: `╭━━━〔 🛡️ *ANTI-LINK* 🛡️ 〕━━━⣣\n` +
-                          `┃\n` +
-                          `┃  📊 *Current Status:* ${status}\n` +
-                          `┃  💡 *Usage:* .antilink on / off\n` +
-                          `┃\n` +
-                          `┣──────────────────────────┫\n` +
-                          `┃\n` +
-                          `┃  🔗 *Discord Community:*\n` +
-                          `┃  https://discord.gg/syndicateps\n` +
-                          `┃\n` +
-                          `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭` 
+                    text: 
+                        `Current Status: ${status}\n` +
+                        `Usage: .antilink on / off`
                 }, { quoted: msg });
             }
 
         } catch (error) {
             // Log any unexpected execution errors
             console.error("Antilink command error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to update anti-link settings." }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "Failed to update anti-link settings." }, { quoted: msg });
         }
     },
     
