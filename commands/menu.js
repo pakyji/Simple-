@@ -3,18 +3,31 @@ const path = require("path");
 
 module.exports = {
     name: "Menu",
+    category: "GENERAL",
     description: "Shows this command list",
     execute: async (sock, msg, sender) => {
         let prefix = ",";
-        
+        let owners = [];
+
         const configPath = path.join(__dirname, "../config.json");
         if (fs.existsSync(configPath)) {
             try {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 if (config.bot?.prefix) prefix = config.bot.prefix;
+                if (config.bot?.owners) owners = config.bot.owners;
             } catch (e) {
                 console.error("Error reading config.json:", e);
             }
+        }
+
+        // Sender ka clean number nikalna
+        const senderNumber = sender.replace(/[^0-9]/g, "");
+
+        // Agar owners list mein number mojood nahi hai, toh menu access deny kar dein
+        if (owners.length > 0 && !owners.includes(senderNumber)) {
+            return await sock.sendMessage(sender, { 
+                text: `*ACCESS DENIED:* You are not authorized to view the menu!` 
+            }, { quoted: msg });
         }
 
         const commandsDir = path.join(__dirname);
@@ -43,7 +56,6 @@ module.exports = {
             console.error("Error reading commands folder:", e);
         }
 
-        // Server link ko properly adjust kiya gaya hai taake issue na aaye
         let menuText = 
             `╔════════════════════════════╗\n` +
             `║     ✦ THE SYNDICATE ✦      ║\n` +
@@ -55,13 +67,11 @@ module.exports = {
             `║            syndicateps     ║\n` +
             `╚════════════════════════════╝\n\n`;
 
-        // Sort categories alphabetically
         const sortedCategories = Object.keys(categories).sort();
 
         for (const cat of sortedCategories) {
             menuText += `┏━━━━━━━〔 ${cat} 〕━━━━━━━┓\n\n`;
             
-            // Sort commands inside category
             categories[cat].sort((a, b) => a.name.localeCompare(b.name));
 
             for (const cmd of categories[cat]) {
