@@ -14,14 +14,16 @@ module.exports = {
     
     async execute(sock, msg, sender, args) {
         try {
-            // Check if message is an image or reply to an image
+            // Safely check for image in current message or quoted/replied message
             const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-            const isImage = msg.message?.imageMessage || quotedMessage?.imageMessage;
+            
+            const isDirectImage = msg.message?.imageMessage;
+            const isQuotedImage = quotedMessage?.imageMessage;
 
-            if (!isImage) {
+            if (!isDirectImage && !isQuotedImage) {
                 const helpText = `╭━━━〔 🔗 *IMAGE URL GENERATOR* 🔗 〕━━━⣣\n` +
                                  `┃\n` +
-                                 `┃  ❌ *No image found!*\n` +
+                                 `┃  ❌ *No image detected!* \n` +
                                  `┃  💡 *How to use:*\n` +
                                  `┃  • Send an image with caption \`.url\`\n` +
                                  `┃  • Or reply to any image with \`.url\`\n` +
@@ -34,7 +36,7 @@ module.exports = {
 
             await sock.sendMessage(sender, { text: "⏳ *Uploading image to get public URL...*" }, { quoted: msg });
 
-            // Download media buffer
+            // Download media buffer safely using Baileys
             const buffer = await downloadMediaMessage(
                 msg,
                 'buffer',
@@ -44,6 +46,10 @@ module.exports = {
                     reuploadRequest: sock.updateMediaMessage 
                 }
             );
+
+            if (!buffer) {
+                throw new Error("Downloaded media buffer is empty.");
+            }
 
             // Prepare form data to upload image to catbox.moe
             const formData = new FormData();
@@ -80,7 +86,7 @@ module.exports = {
 
         } catch (error) {
             console.error("URL command error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to upload image and generate URL." }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "❌ Failed to upload image. Make sure you reply directly to an image!" }, { quoted: msg });
         }
     }
 };
