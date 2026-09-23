@@ -17,9 +17,8 @@ module.exports = {
             }
         }
 
-        // Automatically read all command files from the directory
         const commandsDir = path.join(__dirname);
-        let commandListText = "";
+        const categories = {};
 
         try {
             const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js') && file.toLowerCase() !== 'menu.js');
@@ -28,7 +27,13 @@ module.exports = {
                 try {
                     const command = require(path.join(commandsDir, file));
                     if (command.name) {
-                        commandListText += `* ${command.name}\n`;
+                        const cat = (command.category || "General").toUpperCase();
+                        if (!categories[cat]) categories[cat] = [];
+                        
+                        categories[cat].push({
+                            name: command.name,
+                            description: command.description || ""
+                        });
                     }
                 } catch (err) {
                     console.error(`Error loading command file ${file}:`, err);
@@ -36,20 +41,29 @@ module.exports = {
             }
         } catch (e) {
             console.error("Error reading commands folder:", e);
-            commandListText = `* Menu\n* tagall\n`;
         }
 
-        const menuText = 
-            `COMMAND LIST\n\n` +
-            `[ The Syndicate ]\n` +
-            `- Prefix: ${prefix}\n` +
-            `- Menu: \n` +
-            `- Version: 2.5.0\n` +
-            `- Server Link: https://discord.gg/syndicateps\n\n\n\n` +
-            `[ AVAILABLE COMMANDS ]\n` +
-            commandListText + `\n` +
-            `Use the prefix followed by the command name.`;
+        let menuText = 
+            `*The Syndicate* // v2.5.0\n` +
+            `Prefix: [ ${prefix} ]\n` +
+            `Server: syndicateps\n\n`;
 
-        await sock.sendMessage(sender, { text: menuText }, { quoted: msg });
+        // Sort categories alphabetically
+        const sortedCategories = Object.keys(categories).sort();
+
+        for (const cat of sortedCategories) {
+            menuText += `${cat}\n`;
+            
+            // Sort commands inside category
+            categories[cat].sort((a, b) => a.name.localeCompare(b.name));
+
+            for (const cmd of categories[cat]) {
+                const desc = cmd.description ? ` — ${cmd.description}` : "";
+                menuText += `- ${cmd.name}${desc}\n`;
+            }
+            menuText += `\n`;
+        }
+
+        await sock.sendMessage(sender, { text: menuText.trim() }, { quoted: msg });
     }
 };
