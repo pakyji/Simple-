@@ -1,17 +1,38 @@
 {
-  "name": "the-syndicate-bot",
-  "version": "1.0.0",
-  "description": "WhatsApp Bot using Baileys and Pairing Code",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+  "bot": {
+    "name": "The Syndicate",
+    "version": "2.5.0",
+    "prefix": ",",
+    "mode": "public",
+    "language": "en",
+    "ownerNumber": "393802347902",
+    "ownerName": "Syndicate",
+    "owners": [
+      "393802347902",
+      "923112345043",
+      "375444447444",
+      "447878785599"
+    ]
   },
-  "dependencies": {
-    "@whiskeysockets/baileys": "6.7.24",
-    "express": "^4.19.2",
-    "pino": "^9.0.0"
+  "features": {
+    "autoReadStatus": true,
+    "autoReadMessages": false,
+    "autoTyping": false,
+    "antiSpam": true,
+    "spamCooldownSeconds": 3
   },
-  "engines": {
-    "node": ">=18.0.0"
+  "groups": {
+    "defaultAntiLink": true,
+    "defaultWelcome": false,
+    "welcomeMessage": "Welcome @user to the group! 🎉 Be sure to read the rules."
+  },
+  "media": {
+    "stickerPackName": "⚡ SYND",
+    "stickerAuthor": "Made by Syndicate",
+    "maxDownloadSizeMB": 50
+  },
+  "apis": {
+    "openWeatherKey": "",
+    "removeBgKey": ""
   }
 }
