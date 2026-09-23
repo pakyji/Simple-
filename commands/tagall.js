@@ -1,4 +1,4 @@
-Module.exports = {
+module.exports = {
     name: "tagall",
     description: "Mention all members in the group",
     async execute(sock, msg, sender, args) {
