@@ -1,46 +1,40 @@
 const fs = require("fs");
-const path = formatPath(); // helper sicuro per i path
+const path = pathModuleSetup();
+const langs = require("../languages");
 
 module.exports = {
     name: "adduser",
     category: "TOOLS",
-    description: "Add a new user number to the owner/whitelist (Owner Only)",
+    description: "Add a new user to owners/whitelist",
     execute: async (sock, msg, sender, args) => {
         let prefix = ",";
         let owners = [];
+        let currentLang = "en";
         const configPath = path.join(__dirname, "../config.json");
 
         if (fs.existsSync(configPath)) {
             try {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 if (config.bot?.prefix) prefix = config.bot.prefix;
-                // Prende sia l'owner principale che l'array owners e pulisce ogni numero tenendo solo le cifre
+                if (config.bot?.language) currentLang = config.bot.language;
                 let rawOwners = [];
                 if (config.bot?.ownerNumber) rawOwners.push(String(config.bot.ownerNumber));
                 if (Array.isArray(config.bot?.owners)) rawOwners = rawOwners.concat(config.bot.owners);
-                
                 owners = rawOwners.map(o => String(o).replace(/[^0-9]/g, ""));
             } catch (e) {
-                console.error("Error reading config.json:", e);
+                console.error("Config read error:", e);
             }
         }
 
-        // Estrae il numero esatto del mittente gestendo sia chat private che gruppi
+        const t = langs[currentLang] || langs["en"];
+
         let senderJid = msg.key?.participant || msg.key?.remoteJid || sender || "";
         const senderNumber = String(senderJid).replace(/[^0-9]/g, "");
 
-        // Debug nel terminale per vedere cosa confronta
-        console.log("DEBUG CHECK ---> Mittente pulito:", senderNumber);
-        console.log("DEBUG CHECK ---> Owner autorizzati:", owners);
-
-        // Controllo se il mittente è tra gli owner autorizzati
         if (owners.length > 0 && !owners.includes(senderNumber)) {
-            return await sock.sendMessage(sender, { 
-                text: `ACCESS DENIED: Your number (${senderNumber}) is not authorized.` 
-            }, { quoted: msg });
+            return await sock.sendMessage(sender, { text: `*${t.accessDenied}*` }, { quoted: msg });
         }
 
-        // Gestione dell'input per aggiungere il nuovo utente
         let targetInput = "";
         const mentionedJids = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
         
@@ -52,19 +46,16 @@ module.exports = {
 
         if (!targetInput) {
             return await sock.sendMessage(sender, { 
-                text: `THE SYNDICATE INSTALLER\n\nUsage: ${prefix}adduser <number>\nExample: ${prefix}adduser 923001234567` 
+                text: `*✦ THE SYNDICATE ✦*\n\n${t.usageAdd}` 
             }, { quoted: msg });
         }
 
         if (owners.includes(targetInput)) {
-            return await sock.sendMessage(sender, { 
-                text: `NOTICE: Number ${targetInput} is already whitelisted.` 
-            }, { quoted: msg });
+            return await sock.sendMessage(sender, { text: `*NOTICE:* Number ${targetInput} is already whitelisted.` }, { quoted: msg });
         }
 
         try {
-            // Aggiunge il numero all'array e aggiorna il file config.json
-            const configData = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : { bot: {} };
+            const configData = JSON.parse(fs.readFileSync(configPath, 'utf8'));
             if (!configData.bot.owners) configData.bot.owners = [];
             
             if (!configData.bot.owners.map(o => String(o).replace(/[^0-9]/g, "")).includes(targetInput)) {
@@ -73,19 +64,15 @@ module.exports = {
 
             fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
 
-            await sock.sendMessage(sender, { 
-                text: `SUCCESS: Number ${targetInput} has been added successfully!` 
-            }, { quoted: msg });
+            await sock.sendMessage(sender, { text: `*${t.successAdd}* (${targetInput})` }, { quoted: msg });
 
         } catch (error) {
             console.error("Error updating config.json:", error);
-            await sock.sendMessage(sender, { 
-                text: `ERROR: Failed to save the user number.` 
-            }, { quoted: msg });
+            await sock.sendMessage(sender, { text: `*ERROR:* Failed to save user number.` }, { quoted: msg });
         }
     }
 };
 
-function formatPath() {
+function pathModuleSetup() {
     return require("path");
-}
+    }
