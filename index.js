@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+Const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const path = require("path");
 const pino = require("pino");
@@ -128,8 +128,12 @@ async function startBot() {
         // ==========================
         // 4. COMMAND DISPATCHER
         // ==========================
-        const args = messageText.trim().toLowerCase().split(" ");
-        const commandName = args[0];
+        const trimmedText = messageText.trim();
+        // Assuming your prefix is "." (if message starts with .)
+        if (!trimmedText.startsWith(".")) return;
+
+        const args = trimmedText.slice(1).trim().split(/ +/);
+        const commandName = args.shift().toLowerCase(); // Case-insensitive lookup fix
 
         if (commands.has(commandName)) {
             try {
