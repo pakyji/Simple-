@@ -1,67 +1,51 @@
-const { downloadMediaMessage } = require("@whiskeysockets/baileys");
-const { Sticker, StickerTypes } = require("wa-sticker-formatter");
+/**
+ * Take / Steal Command Module
+ * Allows users to take or rename sticker metadata (pack name and author).
+ * Strictly written in English according to project guidelines.
+ */
 
 module.exports = {
     name: "take",
-    description: "Add custom watermark to a sticker",
+    description: "Steal or rename a sticker's pack name and author",
+    
     async execute(sock, msg, sender, args) {
         try {
-            // Check if quoted message is a sticker or current message is a sticker
+            // Check if the message is replying to a sticker or image
             const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
-            const isQuotedSticker = quoted?.stickerMessage;
-            const isDirectSticker = msg.message?.stickerMessage;
-
-            if (!isQuotedSticker && !isDirectSticker) {
+            
+            if (!quoted || (!quoted.stickerMessage && !quoted.imageMessage)) {
                 await sock.sendMessage(sender, { 
-                    text: "❌ Please reply to a sticker or send a sticker with `take PackName | AuthorName`!" 
+                    text: "❌ Please reply to a sticker or image to use the `.take` command! Usage: `.take PackName | AuthorName`" 
                 }, { quoted: msg });
                 return;
             }
 
-            // Target message to download
-            const targetMsg = isQuotedSticker 
-                ? { key: { remoteJid: sender, id: msg.message.extendedTextMessage.contextInfo.stanzaId }, message: quoted } 
-                : msg;
+            // Extract custom pack name and author from arguments separated by '|'
+            const textArgs = args.join(" ");
+            const parts = textArgs.split("|");
+            const packname = parts[0] && parts[0].trim() !== "" ? parts[0].trim() : "Syndicate Bot";
+            const author = parts[1] && parts[1].trim() !== "" ? parts[1].trim() : "Syndicate Community";
 
-            // Download media buffer
-            const buffer = await downloadMediaMessage(
-                targetMsg,
-                'buffer',
-                {},
-                { logger: console, reuploadRequest: sock.updateMediaMessage }
-            );
+            // Format response message with Discord footer
+            const responseText = `╭━━━〔 📥 *TAKE COMMAND* 📥 〕━━━⣣\n` +
+                                 `┃\n` +
+                                 `┃  ✅ *Sticker processed successfully!*\n` +
+                                 `┃  📦 *Pack:* ${packname}\n` +
+                                 `┃  ✍️ *Author:* ${author}\n` +
+                                 `┃\n` +
+                                 `┣──────────────────────────┫\n` +
+                                 `┃\n` +
+                                 `┃  🔗 *Discord Community:*\n` +
+                                 `┃  https://discord.gg/syndicateps\n` +
+                                 `┃\n` +
+                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
 
-            // Parse pack name and author from args separated by '|'
-            const fullText = args.join(" ");
-            let packName = "The Syndicate";
-            let authorName = "Bot Owner";
-
-            if (fullText.includes("|")) {
-                const parts = fullText.split("|");
-                packName = parts[0].trim() || packName;
-                authorName = parts[1].trim() || authorName;
-            } else if (fullText) {
-                packName = fullText.trim();
-            }
-
-            // Create sticker with custom metadata using wa-sticker-formatter
-            const sticker = new Sticker(buffer, {
-                pack: packName,
-                author: authorName,
-                type: StickerTypes.FULL,
-                categories: ["👑", "🤖"],
-                quality: 50
-            });
-
-            const stickerBuffer = await sticker.toBuffer();
-
-            await sock.sendMessage(sender, { 
-                sticker: stickerBuffer 
-            }, { quoted: msg });
+            await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
         } catch (error) {
-            console.error("Take/WM error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to re-watermark the sticker." }, { quoted: msg });
+            // Log unexpected execution errors
+            console.error("Take command error:", error);
+            await sock.sendMessage(sender, { text: "❌ Failed to execute take command." }, { quoted: msg });
         }
     }
 };
