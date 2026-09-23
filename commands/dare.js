@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     name: "dare",
     description: "Get a random dare challenge",
     async execute(sock, msg, sender, args) {
@@ -14,8 +14,8 @@ module.exports = {
             const randomDare = dares[Math.floor(Math.random() * dares.length)];
 
             const responseText = 
-                `🎯 DARE CHALLENGE 🎯\n\n` +
-                `✨ ${randomDare}`;
+                `DARE CHALLENGE\n\n` +
+                `${randomDare}`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
         } catch (error) {
