@@ -1,4 +1,4 @@
-module.exports = {
+Module.exports = {
     name: "tagall",
     description: "Mention all members in the group",
     async execute(sock, msg, sender, args) {
@@ -21,20 +21,15 @@ module.exports = {
             }
 
             const customMessage = args.join(" ") || "Attention everyone!";
-            let text = `╭━━━〔 📢 *TAG ALL* 📢 〕━━━⣣\n`;
-            text += `┃\n`;
-            text += `┃  💬 *Message:* ${customMessage}\n`;
-            text += `┃  👥 *Total Members:* ${participants.length}\n`;
-            text += `┃\n`;
-            text += `┣──────────────────────────┫\n`;
+            let text = `📢 TAG ALL 📢\n\n`;
+            text += `💬 Message: ${customMessage}\n`;
+            text += `👥 Total Members: ${participants.length}\n\n`;
 
             const mentions = [];
             for (const mem of participants) {
-                text += `┃  • @${mem.id.split("@")[0]}\n`;
+                text += `• @${mem.id.split("@")[0]}\n`;
                 mentions.push(mem.id);
             }
-
-            text += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
 
             // Send message with mentions enabled
             await sock.sendMessage(sender, { 
