@@ -1,5 +1,5 @@
 const fs = require("fs");
-const path = require("path");
+const path = pathModuleSetup();
 
 module.exports = {
     name: "menu",
@@ -14,11 +14,20 @@ module.exports = {
             try {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 if (config.bot?.prefix) prefix = config.bot.prefix;
-                if (config.bot?.language) langCode = config.bot.language;
+                if (config.bot?.language) langCode = config.bot.language.toLowerCase();
             } catch (e) {
                 console.error("Config read error:", e);
             }
         }
+
+        // Testi tradotti in base alla lingua attiva
+        const translations = {
+            en: { title: "MAIN MENU", notFound: "No commands found or loaded." },
+            it: { title: "MENU PRINCIPALE", notFound: "Nessun comando trovato o caricato." },
+            ur: { title: "مرکزی مینو", notFound: "کوئی کمانڈ نہیں ملی۔" }
+        };
+
+        const t = translations[langCode] || translations["en"];
 
         const commandsDir = path.join(__dirname);
         const categories = {};
@@ -29,7 +38,7 @@ module.exports = {
                 for (const file of commandFiles) {
                     try {
                         const filePath = path.join(commandsDir, file);
-                        delete require.cache[require.resolve(filePath)]; // Clear cache for fresh read
+                        delete require.cache[require.resolve(filePath)];
                         const command = require(filePath);
                         if (command && command.name) {
                             const cat = (command.category || "GENERAL").toUpperCase();
@@ -49,13 +58,14 @@ module.exports = {
             `╔════════════════════════════╗\n` +
             `║     ✦ THE SYNDICATE ✦      ║\n` +
             `╠════════════════════════════╣\n` +
+            `║ ${t.title.padEnd(26)}║\n` +
             `║ LANG    :: ${langCode.toUpperCase().padEnd(16)}║\n` +
             `║ PREFIX  :: ${prefix.padEnd(16)}║\n` +
             `╚════════════════════════════╝\n\n`;
 
         const sortedCategories = Object.keys(categories).sort();
         if (sortedCategories.length === 0) {
-            menuText += `┃ No commands found or loaded.\n`;
+            menuText += `┃ ${t.notFound}\n`;
         } else {
             for (const cat of sortedCategories) {
                 menuText += `┏━━━━━━━〔 ${cat} 〕━━━━━━━┓\n\n`;
@@ -68,14 +78,13 @@ module.exports = {
             }
         }
 
-        // Target sender determine karna
-        let targetJid = sender;
-        if (!targetJid && msg.key) {
-            targetJid = msg.key.remoteJid;
-        }
-
-        if (targetJid) {
-            await sock.sendMessage(targetJid, { text: menuText.trim() }, { quoted: msg });
+        let targetChat = msg.key?.remoteJid || sender;
+        if (targetChat) {
+            await sock.sendMessage(targetChat, { text: menuText.trim() }, { quoted: msg });
         }
     }
 };
+
+function pathModuleSetup() {
+    return require("path");
+}
