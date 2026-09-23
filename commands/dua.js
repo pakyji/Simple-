@@ -8,11 +8,7 @@ module.exports = {
             "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً - Our Lord, let not our hearts deviate after You have guided us and grant us from Yourself mercy."
         ];
         const randomDua = duas[Math.floor(Math.random() * duas.length)];
-        const text = `╭━━━〔 🤲 *DAILY DUA* 〕━━━⣣\n` +
-                     `┃\n` +
-                     `┃  💬 "${randomDua}"\n` +
-                     `┃\n` +
-                     `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+        const text = `Dua: ${randomDua}`;
         await sock.sendMessage(sender, { text: text }, { quoted: msg });
     }
 };
