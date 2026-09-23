@@ -22,44 +22,33 @@ module.exports = {
         // Security Check: Only Owner
         const senderNumber = sender.split("@")[0];
         if (senderNumber !== ownerNumber) {
-            const deniedText = `╭━━━〔 ⚠️ *ACCESS DENIED* 〕━━━⣣\n` +
-                               `┃\n` +
-                               `┃  ❌ This command is only for the Bot Owner!\n` +
-                               `┃\n` +
-                               `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const deniedText = `This command is only for the Bot Owner.`;
             return await sock.sendMessage(sender, { text: deniedText }, { quoted: msg });
         }
 
         const broadcastText = args.join(" ");
         if (!broadcastText) {
-            const usageText = `╭━━━〔 📢 *BROADCAST* 〕━━━⣣\n` +
-                              `┃\n` +
-                              `┃  ⚠️ Please provide a message!\n` +
-                              `┃  💡 *Usage:* ,broadcast Hello everyone!\n` +
-                              `┃\n` +
-                              `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const usageText = 
+                `Please provide a message.\n` +
+                `Usage: ,broadcast Hello everyone!`;
             return await sock.sendMessage(sender, { text: usageText }, { quoted: msg });
         }
 
         // ==========================
-        // EXCLUDE LIST (Yahan un groups ya numbers ki JID likhein jinhein chhorna hai)
-        // Misal ke taur par: "1234567890-group@g.us" ya "393802347902@s.whatsapp.net"
+        // EXCLUDE LIST (Add JIDs of groups or numbers to exclude here)
+        // Example: "123456789-group@g.us" or "393802347902@s.whatsapp.net"
         // ==========================
         const excludeList = [
             // "123456789-group@g.us",
             // "393802347902@s.whatsapp.net"
         ];
 
-        await sock.sendMessage(sender, { text: `📢 Starting broadcast (excluding specified chats)... Please wait.` }, { quoted: msg });
+        await sock.sendMessage(sender, { text: `Starting broadcast (excluding specified chats)... Please wait.` }, { quoted: msg });
 
         try {
             let successCount = 0;
             let skippedCount = 0;
-            const finalMessage = `╭━━━〔 📢 *ANNOUNCEMENT* 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  ${broadcastText}\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const finalMessage = `${broadcastText}`;
 
             // Fetch all participating groups
             const groupChats = await sock.groupFetchAllParticipating();
@@ -69,8 +58,8 @@ module.exports = {
                 // Check if this chat is in the exclude list
                 if (excludeList.includes(jid)) {
                     skippedCount++;
-                    console.log(`⏩ Skipped chat: ${jid}`);
-                    continue; // Is chat ko chhor kar agli par chalay jao
+                    console.log(`Skipped chat: ${jid}`);
+                    continue;
                 }
 
                 try {
@@ -83,17 +72,15 @@ module.exports = {
                 }
             }
 
-            const successText = `╭━━━〔 ✅ *BROADCAST COMPLETE* 〕━━━⣣\n` +
-                                `┃\n` +
-                                `┃  🚀 Delivered: *${successCount}* chats\n` +
-                                `┃  ⏩ Skipped: *${skippedCount}* chats\n` +
-                                `┃\n` +
-                                `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const successText = 
+                `Broadcast Complete\n\n` +
+                `Delivered: ${successCount} chats\n` +
+                `Skipped: ${skippedCount} chats`;
             await sock.sendMessage(sender, { text: successText }, { quoted: msg });
 
         } catch (error) {
-            console.error("❌ Error during broadcast:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to complete broadcast." }, { quoted: msg });
+            console.error("Error during broadcast:", error);
+            await sock.sendMessage(sender, { text: "Failed to complete broadcast." }, { quoted: msg });
         }
     }
 };
