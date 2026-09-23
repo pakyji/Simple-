@@ -1,40 +1,58 @@
 const { downloadMediaMessage } = require("@whiskeysockets/baileys");
+const sharp = require("sharp");
 
 module.exports = {
     name: "sticker",
-    description: "Convert an image into a WhatsApp sticker",
+    description: "Convert any image into a WhatsApp sticker",
     async execute(sock, msg, sender, args) {
         try {
-            const m = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage ? {
-                key: {
-                    remoteJid: sender,
-                    id: msg.message.extendedTextMessage.contextInfo.stanzaId,
-                    participant: msg.message.extendedTextMessage.contextInfo.participant
-                },
-                message: msg.message.extendedTextMessage.contextInfo.quotedMessage
-            } : msg;
+            const quotedMsg = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+            const hasDirectImage = msg.message?.imageMessage;
+            const hasQuotedImage = quotedMsg?.imageMessage;
 
-            const mime = m.message?.imageMessage || m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage;
-
-            if (!m.message?.imageMessage && !m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.imageMessage) {
-                await sock.sendMessage(sender, { text: "❌ Please reply to a valid image with 'sticker'!" }, { quoted: msg });
+            if (!hasDirectImage && !hasQuotedImage) {
+                await sock.sendMessage(sender, { 
+                    text: "❌ Please send or reply to a valid image with `sticker`!" 
+                }, { quoted: msg });
                 return;
             }
 
             await sock.sendMessage(sender, { text: "⏳ Converting image to sticker..." }, { quoted: msg });
 
+            let targetMessage = msg;
+            if (hasQuotedImage) {
+                const contextInfo = msg.message.extendedTextMessage.contextInfo;
+                targetMessage = {
+                    key: {
+                        remoteJid: sender,
+                        id: contextInfo.stanzaId,
+                        participant: contextInfo.participant
+                    },
+                    message: quotedMsg
+                };
+            }
+
             const buffer = await downloadMediaMessage(
-                m,
+                targetMessage,
                 "buffer",
                 {},
                 { logger: console }
             );
 
-            await sock.sendMessage(sender, { sticker: buffer }, { quoted: msg });
+            // Convert any image format to WebP sticker format using sharp
+            const webpBuffer = await sharp(buffer)
+                .resize(512, 512, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                .webp({ quality: 80 })
+                .toBuffer();
+
+            // Send the converted sticker
+            await sock.sendMessage(sender, { sticker: webpBuffer }, { quoted: msg });
 
         } catch (error) {
-            console.error("Sticker error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to create sticker. Make sure you replied to a valid image!" }, { quoted: msg });
+            console.error("❌ Sticker error:", error);
+            await sock.sendMessage(sender, { 
+                text: "❌ Failed to create sticker. Make sure 'sharp' is installed (`npm install sharp`) and you replied to a valid image!" 
+            }, { quoted: msg });
         }
     }
 };
