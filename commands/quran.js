@@ -8,12 +8,11 @@ module.exports = {
             const data = await response.json();
             const ayah = data.data;
 
-            const text = `╭━━━〔 📖 *QURAN AYAH* 〕━━━⣣\n` +
-                         `┃\n` +
-                         `┃  📌 *Surah:* ${ayah.surah.englishName} (Ayah ${ayah.numberInSurah})\n` +
-                         `┃  💬 "${ayah.text}"\n` +
-                         `┃\n` +
-                         `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const text = 
+                `📖 Quran Ayah\n\n` +
+                `📌 Surah: ${ayah.surah.englishName} (Ayah ${ayah.numberInSurah})\n` +
+                `💬 "${ayah.text}"`;
+
             await sock.sendMessage(sender, { text: text }, { quoted: msg });
         } catch (error) {
             await sock.sendMessage(sender, { text: "❌ Failed to fetch Quran ayah." }, { quoted: msg });
