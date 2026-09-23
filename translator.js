@@ -1,4 +1,3 @@
-// translator.js
 const fs = require('fs');
 const path = require('path');
 
@@ -43,7 +42,14 @@ function translateText(text) {
         return dictionary[lang][text];
     }
     
-    return text; // Fallback to original text if translation not found
+    // Partial match check (agar text ke andar status ya usage ho)
+    for (const key in dictionary[lang]) {
+        if (text.includes(key)) {
+            text = text.replace(key, dictionary[lang][key]);
+        }
+    }
+    
+    return text;
 }
 
 module.exports = { translateText };
