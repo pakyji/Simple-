@@ -14,30 +14,37 @@ module.exports = {
             try {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 if (config.bot?.prefix) prefix = config.bot.prefix;
-                if (config.bot?.owners) owners = config.bot.owners;
+                if (config.bot?.owners) owners = config.bot.owners.map(o => String(o).replace(/[^0-9]/g, ""));
             } catch (e) {
                 console.error("Error reading config.json:", e);
             }
         }
 
-        // Sender verification (Only current owners can add new users)
+        // Pulizia corretta del numero del mittente per il confronto
         const senderNumber = sender.replace(/[^0-9]/g, "");
+        
         if (owners.length > 0 && !owners.includes(senderNumber)) {
             return await sock.sendMessage(sender, { 
                 text: `*ACCESS DENIED:* Only the bot owner can use this command!` 
             }, { quoted: msg });
         }
 
-        // Target user number argument check
-        const targetInput = args && args[0] ? args[0].replace(/[^0-9]/g, "") : "";
+        // Controlla se è stata fatta una menzione oppure è stato scritto un numero neiargs
+        let targetInput = "";
+        const mentionedJids = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
+        
+        if (mentionedJids && mentionedJids.length > 0) {
+            targetInput = mentionedJids[0].replace(/[^0-9]/g, "");
+        } else if (args && args[0]) {
+            targetInput = args[0].replace(/[^0-9]/g, "");
+        }
 
         if (!targetInput) {
             return await sock.sendMessage(sender, { 
-                text: `*✦ THE SYNDICATE ✦*\n\nUsage: ${prefix}adduser <phone_number>\nExample: ${prefix}adduser 923001234567` 
+                text: `*✦ THE SYNDICATE ✦*\n\nUsage: ${prefix}adduser <number_or_mention>\nExample: ${prefix}adduser 923001234567` 
             }, { quoted: msg });
         }
 
-        // Check if number already exists in owners list
         if (owners.includes(targetInput)) {
             return await sock.sendMessage(sender, { 
                 text: `*NOTICE:* Number *${targetInput}* is already in the whitelist!` 
@@ -45,10 +52,8 @@ module.exports = {
         }
 
         try {
-            // Add number to owners array
             owners.push(targetInput);
 
-            // Read existing config, update owners, and save back
             const configData = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, 'utf8')) : { bot: {} };
             if (!configData.bot) configData.bot = {};
             configData.bot.owners = owners;
