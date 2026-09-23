@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const pino = require("pino");
 const { getGroupSettings } = require("./utils/settings");
+const { translateText } = require("./translator"); // 👈 Yahan translator import kar liya hai
 
 // ==========================
 // 1. CONFIG LOADER (Nested Structure Support)
@@ -44,6 +45,17 @@ async function startBot() {
         logger: pino({ level: "silent" }),
         browser: [ "Chrome", "Safari", "12.0.0" ]
     });
+
+    // 💡 Wrapper function jo automatically har message ko active language mein translate kar dega
+    const originalSendMessage = sock.sendMessage.bind(sock);
+    sock.sendMessage = async (jid, content, options) => {
+        if (content && typeof content === 'object' && content.text) {
+            content.text = translateText(content.text); // Automatically translate text content
+        } else if (content && typeof content === 'string') {
+            content = translateText(content);
+        }
+        return await originalSendMessage(jid, content, options);
+    };
 
     if (!state.creds.registered) {
         console.log("\n📱 Generating Pairing Code for: " + TARGET_PHONE_NUMBER);
