@@ -43,22 +43,22 @@ module.exports = {
             console.error("Error reading commands folder:", e);
         }
 
-        // Header principale in stile box chiuso con separatore
+        // Server link ko properly adjust kiya gaya hai taake issue na aaye
         let menuText = 
             `╔════════════════════════════╗\n` +
             `║     ✦ THE SYNDICATE ✦      ║\n` +
             `╠════════════════════════════╣\n` +
             `║ PREFIX  :: ${prefix.padEnd(16)}║\n` +
             `║ VERSION :: 2.5.0           ║\n` +
-            `║ SERVER  :: discord.gg/     ║\n` +
-            `║           syndicateps      ║\n` +
+            `║ SERVER  :: https://        ║\n` +
+            `║            discord.gg/     ║\n` +
+            `║            syndicateps     ║\n` +
             `╚════════════════════════════╝\n\n`;
 
         // Sort categories alphabetically
         const sortedCategories = Object.keys(categories).sort();
 
         for (const cat of sortedCategories) {
-            // Intestazione della categoria con box e angoli spessi
             menuText += `┏━━━━━━━〔 ${cat} 〕━━━━━━━┓\n\n`;
             
             // Sort commands inside category
