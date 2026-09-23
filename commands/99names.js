@@ -12,14 +12,13 @@ module.exports = {
     description: "Get one of the 99 Beautiful Names of Allah",
     async execute(sock, msg, sender, args) {
         const randomName = namesOfAllah[Math.floor(Math.random() * namesOfAllah.length)];
-        const text = `╭━━━〔 ✨ *99 NAMES OF ALLAH* 〕━━━⣣\n` +
-                     `┃\n` +
-                     `┃  🔢 *Number:* ${randomName.number}\n` +
-                     `┃  🌙 *Arabic:* ${randomName.ar}\n` +
-                     `┃  🔤 *English:* ${randomName.en}\n` +
-                     `┃  💡 *Meaning:* ${randomName.meaning}\n` +
-                     `┃\n` +
-                     `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+        const text = 
+            `99 Names of Allah\n` +
+            `Number: ${randomName.number}\n` +
+            `Arabic: ${randomName.ar}\n` +
+            `English: ${randomName.en}\n` +
+            `Meaning: ${randomName.meaning}`;
+            
         await sock.sendMessage(sender, { text: text }, { quoted: msg });
     }
 };
