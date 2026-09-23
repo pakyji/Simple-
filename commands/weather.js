@@ -40,20 +40,13 @@ module.exports = {
             const country = data.nearest_area[0].country[0].value;
 
             // Format the response message
-            const responseText = `╭━━━〔 🌤️ *WEATHER REPORT* 🌤️ 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  📍 *Location:* ${area}, ${country}\n` +
-                                 `┃  🌡️ *Temperature:* ${tempC}°C / ${tempF}°F\n` +
-                                 `┃  ☁️ *Condition:* ${weatherDesc}\n` +
-                                 `┃  💧 *Humidity:* ${humidity}%\n` +
-                                 `┃  🌬️ *Wind Speed:* ${windSpeedKmph} km/h\n` +
-                                 `┃\n` +
-                                 `┣──────────────────────────┫\n` +
-                                 `┃\n` +
-                                 `┃  🔗 *Discord Community:*\n` +
-                                 `┃  https://discord.gg/syndicateps\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const responseText = 
+                `🌤️ WEATHER REPORT 🌤️\n\n` +
+                `📍 Location: ${area}, ${country}\n` +
+                `🌡️ Temperature: ${tempC}°C / ${tempF}°F\n` +
+                `☁️ Condition: ${weatherDesc}\n` +
+                `💧 Humidity: ${humidity}%\n` +
+                `🌬️ Wind Speed: ${windSpeedKmph} km/h`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
