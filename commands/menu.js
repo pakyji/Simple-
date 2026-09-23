@@ -1,5 +1,5 @@
 const fs = require("fs");
-const path = pathModuleSetup();
+const path = require("path");
 
 module.exports = {
     name: "menu",
@@ -20,11 +20,41 @@ module.exports = {
             }
         }
 
-        // Testi tradotti in base alla lingua attiva
+        // Har language ke liye translations
         const translations = {
-            en: { title: "MAIN MENU", notFound: "No commands found or loaded." },
-            it: { title: "MENU PRINCIPALE", notFound: "Nessun comando trovato o caricato." },
-            ur: { title: "مرکزی مینو", notFound: "کوئی کمانڈ نہیں ملی۔" }
+            en: {
+                title: "MAIN MENU",
+                notFound: "No commands found or loaded.",
+                categories: { GENERAL: "GENERAL", TOOLS: "TOOLS" },
+                descriptions: {
+                    menu: "Shows the main command list",
+                    setlang: "Change bot language (en/it/ur)",
+                    adduser: "Add a new user to owners/whitelist",
+                    install: "Install a new plugin dynamically via raw URL"
+                }
+            },
+            it: {
+                title: "MENU PRINCIPALE",
+                notFound: "Nessun comando trovato o caricato.",
+                categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI" },
+                descriptions: {
+                    menu: "Mostra la lista dei comandi principali",
+                    setlang: "Cambia la lingua del bot (en/it/ur)",
+                    adduser: "Aggiungi un nuovo utente ai proprietari",
+                    install: "Installa un nuovo plugin dinamicamente tramite URL"
+                }
+            },
+            ur: {
+                title: "مرکزی مینو",
+                notFound: "کوئی کمانڈ نہیں ملی۔",
+                categories: { GENERAL: "جنرل", TOOLS: "ٹولز" },
+                descriptions: {
+                    menu: "مین کمانڈ لسٹ دکھاتا ہے",
+                    setlang: "بوٹ کی زبان تبدیل کریں (en/it/ur)",
+                    adduser: "نیا یوزر اونرز لسٹ میں شامل کریں",
+                    install: "را یو آر ایل کے ذریعے نیا پلگ ان انسٹال کریں"
+                }
+            }
         };
 
         const t = translations[langCode] || translations["en"];
@@ -41,9 +71,17 @@ module.exports = {
                         delete require.cache[require.resolve(filePath)];
                         const command = require(filePath);
                         if (command && command.name) {
-                            const cat = (command.category || "GENERAL").toUpperCase();
+                            const rawCat = (command.category || "GENERAL").toUpperCase();
+                            const cat = t.categories[rawCat] || rawCat;
                             if (!categories[cat]) categories[cat] = [];
-                            categories[cat].push({ name: command.name, description: command.description || "" });
+                            
+                            // Translated description agar mojood ho toh wo use karein
+                            let desc = command.description || "";
+                            if (t.descriptions[command.name]) {
+                                desc = t.descriptions[command.name];
+                            }
+                            
+                            categories[cat].push({ name: command.name, description: desc });
                         }
                     } catch (err) {
                         console.error(`Error loading command file ${file}:`, err);
@@ -84,7 +122,3 @@ module.exports = {
         }
     }
 };
-
-function pathModuleSetup() {
-    return require("path");
-}
