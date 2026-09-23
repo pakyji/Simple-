@@ -4,10 +4,26 @@ const path = require("path");
 const pino = require("pino");
 const { getGroupSettings } = require("./utils/settings");
 
-// PUT YOUR PHONE NUMBER HERE (With country code, e.g., 393802347902)
-const TARGET_PHONE_NUMBER = "393802347902";
+// ==========================
+// 1. CONFIG LOADER (Nested Structure Support)
+// ==========================
+const configPath = path.join(__dirname, 'config.json');
+let config = {
+    bot: { prefix: ",", ownerNumber: "393802347902", mode: "public" },
+    features: { autoReadStatus: true, autoTyping: false, antiSpam: true }
+};
 
-// 1. Commands Loader
+if (fs.existsSync(configPath)) {
+    try {
+        config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    } catch (e) {
+        console.error("❌ Error reading config.json:", e);
+    }
+}
+
+const TARGET_PHONE_NUMBER = config.bot?.ownerNumber || "393802347902";
+
+// 2. Commands Loader
 const commands = new Map();
 const commandFiles = fs.readdirSync(path.join(__dirname, "commands")).filter(file => file.endsWith(".js"));
 
@@ -20,7 +36,8 @@ for (const file of commandFiles) {
 }
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState("auth_info");
+    const sessionFolder = config.media?.sessionName || "auth_info";
+    const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
 
     const sock = makeWASocket({
         auth: state,
@@ -30,7 +47,6 @@ async function startBot() {
 
     if (!state.creds.registered) {
         console.log("\n📱 Generating Pairing Code for: " + TARGET_PHONE_NUMBER);
-        // Wait a few seconds for the socket to establish connection before requesting pairing code
         setTimeout(async () => {
             try {
                 let code = await sock.requestPairingCode(TARGET_PHONE_NUMBER.trim());
@@ -60,18 +76,21 @@ async function startBot() {
     sock.ev.on("creds.update", saveCreds);
 
     // ==========================
-    // 2. AUTOMATIC STATUS VIEWER & MESSAGE HANDLER
+    // 3. AUTOMATIC STATUS VIEWER & MESSAGE HANDLER
     // ==========================
     sock.ev.on("messages.upsert", async ({ messages, type }) => {
         const msg = messages[0];
         if (!msg || !msg.key) return;
 
+        // Auto Read Status if enabled in config
         if (msg.key.remoteJid === "status@broadcast") {
-            try {
-                await sock.readMessages([msg.key]);
-                console.log(`👀 Automatically viewed status from: ${msg.key.participant || "Unknown"}`);
-            } catch (error) {
-                console.error("❌ Error viewing status:", error);
+            if (config.features?.autoReadStatus !== false) {
+                try {
+                    await sock.readMessages([msg.key]);
+                    console.log(`👀 Automatically viewed status from: ${msg.key.participant || "Unknown"}`);
+                } catch (error) {
+                    console.error("❌ Error viewing status:", error);
+                }
             }
             return;
         }
@@ -101,12 +120,13 @@ async function startBot() {
         if (!messageText) return;
 
         // ==========================
-        // 3. CONDITIONAL ANTI-LINK FEATURE
+        // 4. CONDITIONAL ANTI-LINK FEATURE
         // ==========================
         if (isGroup) {
             const settings = getGroupSettings(sender);
+            const antiLinkActive = settings.antiLink !== undefined ? settings.antiLink : config.groups?.defaultAntiLink;
             
-            if (settings.antiLink) {
+            if (antiLinkActive) {
                 const linkRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|([a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}[^\s]*)/gi;
                 
                 if (linkRegex.test(messageText)) {
@@ -126,30 +146,34 @@ async function startBot() {
         }
 
         // ==========================
-        // 4. COMMAND DISPATCHER (Dynamic Prefix)
+        // 5. COMMAND DISPATCHER (Flexible Prefix for . and ,)
         // ==========================
         const trimmedText = messageText.trim();
+        const configuredPrefix = config.bot?.prefix || ",";
+        const allowedPrefixes = [".", ",", configuredPrefix];
+        let usedPrefix = null;
 
-        // Read prefix dynamically from config.json (Default is ".")
-        let currentPrefix = ".";
-        const configPath = path.join(__dirname, 'config.json');
-        if (fs.existsSync(configPath)) {
-            try {
-                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-                if (config.prefix) currentPrefix = config.prefix;
-            } catch (e) {
-                console.error("Error reading config.json:", e);
+        for (const p of allowedPrefixes) {
+            if (trimmedText.startsWith(p)) {
+                usedPrefix = p;
+                break;
             }
         }
 
-        if (!trimmedText.startsWith(currentPrefix)) return;
+        if (!usedPrefix) return;
 
-        const args = trimmedText.slice(currentPrefix.length).trim().split(/ +/);
+        const args = trimmedText.slice(usedPrefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
 
         if (commands.has(commandName)) {
             try {
                 console.log(`⚡ Executing command: ${commandName}`);
+                
+                // Optional Auto Typing simulation if enabled
+                if (config.features?.autoTyping) {
+                    await sock.sendPresenceUpdate('composing', sender);
+                }
+
                 await commands.get(commandName).execute(sock, msg, sender, args);
             } catch (error) {
                 console.error(`❌ Error executing ${commandName}:`, error);
