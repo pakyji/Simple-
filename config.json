@@ -1,0 +1,31 @@
+{
+  "bot": {
+    "name": "The Syndicate",
+    "version": "2.5.0",
+    "prefix": ",",
+    "mode": "public",
+    "ownerNumber": "393802347902",
+    "ownerName": "Syndicate"
+  },
+  "features": {
+    "autoReadStatus": true,
+    "autoReadMessages": false,
+    "autoTyping": false,
+    "antiSpam": true,
+    "spamCooldownSeconds": 3
+  },
+  "groups": {
+    "defaultAntiLink": true,
+    "defaultWelcome": false,
+    "welcomeMessage": "Welcome @user to the group! 🎉 Be sure to read the rules."
+  },
+  "media": {
+    "stickerPackName": "⚡ SYND",
+    "stickerAuthor": "Made by Syndicate",
+    "maxDownloadSizeMB": 50
+  },
+  "apis": {
+    "openWeatherKey": "",
+    "removeBgKey": ""
+  }
+}
