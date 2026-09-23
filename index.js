@@ -2,11 +2,10 @@ const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = requi
 const fs = require("fs");
 const path = require("path");
 const pino = require("pino");
-const readline = require("readline");
 const { getGroupSettings } = require("./utils/settings");
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+// PUT YOUR PHONE NUMBER HERE (With country code, e.g., 393802347902)
+const TARGET_PHONE_NUMBER = "393802347902";
 
 // 1. Commands Loader
 const commands = new Map();
@@ -29,21 +28,21 @@ async function startBot() {
         browser: [ "Chrome", "Safari", "12.0.0" ]
     });
 
-    // Only request pairing code if NOT already registered/paired
     if (!state.creds.registered) {
-        console.log("\n📱 No existing session found. Let's use Pairing Code!");
-        const phoneNumber = await question("Enter your WhatsApp phone number with country code (e.g., 923XXXXXXXXX): ");
-        
-        try {
-            let code = await sock.requestPairingCode(phoneNumber.trim());
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
-            console.log(`\n🔑 YOUR PAIRING CODE IS: ${code}\n`);
-            console.log("Go to WhatsApp -> Linked Devices -> Link a Device -> Link with phone number instead, and enter this code.");
-        } catch (error) {
-            console.error("❌ Error requesting pairing code:", error);
-        }
+        console.log("\n📱 Generating Pairing Code for: " + TARGET_PHONE_NUMBER);
+        // Wait a few seconds for the socket to establish connection before requesting pairing code
+        setTimeout(async () => {
+            try {
+                let code = await sock.requestPairingCode(TARGET_PHONE_NUMBER.trim());
+                code = code?.match(/.{1,4}/g)?.join("-") || code;
+                console.log(`\n🔑 YOUR PAIRING CODE IS: ${code}\n`);
+                console.log("Go to WhatsApp -> Linked Devices -> Link a Device -> Link with phone number instead, and enter this code.");
+            } catch (error) {
+                console.error("❌ Error requesting pairing code:", error);
+            }
+        }, 3000);
     } else {
-        console.log("✅ Existing session detected from auth_info. Logging in directly...");
+        console.log("✅ Session found. Logging in directly...");
     }
 
     sock.ev.on("connection.update", (update) => {
@@ -77,7 +76,6 @@ async function startBot() {
             return;
         }
 
-        // Support both incoming messages and self-chat (fromMe / append)
         if (type !== "notify" && type !== "append") return;
         if (!msg.message) return;
 
