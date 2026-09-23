@@ -42,13 +42,11 @@ module.exports = {
             
             const translatedText = response.data[0].map(item => item[0]).join("");
 
-            const responseText = `╭━━━〔 🌐 *TRANSLATION* 🌐 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  🔤 *Target Lang:* ${targetLang.toUpperCase()}\n` +
-                                 `┃  📝 *Original:* ${textToTranslate}\n` +
-                                 `┃  ✨ *Translated:* ${translatedText}\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const responseText = 
+                `🌐 TRANSLATION 🌐\n\n` +
+                `🔤 Target Lang: ${targetLang.toUpperCase()}\n` +
+                `📝 Original: ${textToTranslate}\n` +
+                `✨ Translated: ${translatedText}`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
