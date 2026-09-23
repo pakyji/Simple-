@@ -1,52 +1,67 @@
-const axios = require("axios");
+/**
+ * Weather Command Module
+ * Fetches real-time weather details and temperature for any requested city.
+ * Strictly written in English according to project guidelines.
+ */
+
+const axios = require('axios');
 
 module.exports = {
     name: "weather",
-    description: "Check current weather for any city",
+    description: "Get real-time weather details for any city",
+    
     async execute(sock, msg, sender, args) {
         try {
-            const city = args.join(" ");
-            if (!city) {
+            // Check if the user provided a city name
+            if (!args || args.length === 0) {
                 await sock.sendMessage(sender, { 
-                    text: "❌ Per favore inserisci il nome della città! Esempio: `weather London` oppure `weather Rome`" 
+                    text: "❌ Please provide a city name! Example: `.weather London` or `.weather Karachi`" 
                 }, { quoted: msg });
                 return;
             }
 
-            await sock.sendMessage(sender, { text: `⏳ Cercando le previsioni meteo per *${city}*...` }, { quoted: msg });
+            const cityName = args.join(" ");
 
-            // Usiamo wttr.in in formato JSON per ottenere dati precisi
-            const url = `https://wttr.in/${encodeURIComponent(city)}?format=j1`;
-            const response = await axios.get(url);
+            // Using wttr.in public API for simple and reliable weather data in JSON format
+            const encodedCity = encodeURIComponent(cityName);
+            const apiUrl = `https://wttr.in/${encodedCity}?format=j1`;
+
+            const response = await axios.get(apiUrl);
             const data = response.data;
 
-            const current = data.current_condition[0];
-            const area = data.nearest_area[0];
+            // Extract relevant weather details
+            const currentCondition = data.current_condition[0];
+            const tempC = currentCondition.temp_C;
+            const tempF = currentCondition.temp_F;
+            const weatherDesc = currentCondition.weatherDesc[0].value;
+            const humidity = currentCondition.humidity;
+            const windSpeedKmph = currentCondition.windspeedKmph;
+            const area = data.nearest_area[0].areaName[0].value;
+            const country = data.nearest_area[0].country[0].value;
 
-            const cityName = area.areaName[0].value;
-            const country = area.country[0].value;
-            const tempC = current.temp_C;
-            const tempF = current.temp_F;
-            const desc = current.weatherDesc[0].value;
-            const humidity = current.humidity;
-            const windSpeed = current.windspeedKmph;
+            // Format the response message
+            const responseText = `╭━━━〔 🌤️ *WEATHER REPORT* 🌤️ 〕━━━⣣\n` +
+                                 `┃\n` +
+                                 `┃  📍 *Location:* ${area}, ${country}\n` +
+                                 `┃  🌡️ *Temperature:* ${tempC}°C / ${tempF}°F\n` +
+                                 `┃  ☁️ *Condition:* ${weatherDesc}\n` +
+                                 `┃  💧 *Humidity:* ${humidity}%\n` +
+                                 `┃  🌬️ *Wind Speed:* ${windSpeedKmph} km/h\n` +
+                                 `┃\n` +
+                                 `┣──────────────────────────┫\n` +
+                                 `┃\n` +
+                                 `┃  🔗 *Discord Community:*\n` +
+                                 `┃  https://discord.gg/syndicateps\n` +
+                                 `┃\n` +
+                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
 
-            const weatherText = `╭━━━〔 🌤️ *WEATHER REPORT* 🌤️ 〕━━━⣣\n` +
-                                `┃\n` +
-                                `┃  📍 *Location:* ${cityName}, ${country}\n` +
-                                `┃  🌡️ *Temperature:* ${tempC}°C (${tempF}°F)\n` +
-                                `┃  ☁️ *Condition:* ${desc}\n` +
-                                `┃  💧 *Humidity:* ${humidity}%\n` +
-                                `┃  🌬️ *Wind Speed:* ${windSpeed} km/h\n` +
-                                `┃\n` +
-                                `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
-
-            await sock.sendMessage(sender, { text: weatherText }, { quoted: msg });
+            await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
         } catch (error) {
-            console.error("Weather error:", error);
+            // Log error and notify user if city is not found or API fails
+            console.error("Weather command error:", error);
             await sock.sendMessage(sender, { 
-                text: "❌ Impossibile trovare il meteo per questa città. Assicurati che il nome sia corretto!" 
+                text: "❌ Failed to fetch weather data. Please check the city name and try again." 
             }, { quoted: msg });
         }
     }
