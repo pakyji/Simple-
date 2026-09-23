@@ -14,13 +14,10 @@ module.exports = {
 
             // Check if arguments are provided correctly
             if (!targetNumber || !secretMessage) {
-                const helpText = `╭━━━〔 🥷 *ANONYMOUS MESSAGE* 🥷 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  💡 *How to use:*\n` +
-                                 `┃  • \`.anon <number> <message>\`\n` +
-                                 `┃  • *Example:* \`.anon 1234567890 Hello there!\`\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+                const helpText = 
+                    `How to use:\n` +
+                    `- .anon <number> <message>\n` +
+                    `- Example: .anon 1234567890 Hello there!`;
                 
                 await sock.sendMessage(sender, { text: helpText }, { quoted: msg });
                 return;
@@ -31,22 +28,20 @@ module.exports = {
             const targetJid = cleanNumber + "@s.whatsapp.net";
 
             // Styled anonymous message layout for the receiver
-            const anonText = `╭━━━〔 🥷 *SECRET MESSAGE* 🥷 〕━━━⣣\n` +
-                             `┃\n` +
-                             `┃  💬 *Message:* ${secretMessage}\n` +
-                             `┃\n` +
-                             `┃  _Note: Someone sent you an anonymous message via bot._\n` +
-                             `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const anonText = 
+                `Secret Message:\n\n` +
+                `Message: ${secretMessage}\n\n` +
+                `Note: Someone sent you an anonymous message via bot.`;
 
             // Send the secret message to the target person
             await sock.sendMessage(targetJid, { text: anonText });
 
             // Confirm back to the sender privately
-            await sock.sendMessage(sender, { text: "✅ *Anonymous message sent successfully!* 🥷" }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "Anonymous message sent successfully." }, { quoted: msg });
 
         } catch (error) {
             console.error("Anon command error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to send anonymous message. Make sure the phone number is correct and includes the country code (without +)." }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "Failed to send anonymous message. Make sure the phone number is correct and includes the country code (without +)." }, { quoted: msg });
         }
     }
 };
