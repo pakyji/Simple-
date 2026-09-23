@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const langs = require("../languages");
 
 module.exports = {
     name: "adduser",
@@ -9,14 +8,12 @@ module.exports = {
     execute: async (sock, msg, sender, args) => {
         let prefix = ",";
         let owners = [];
-        let currentLang = "en";
         const configPath = path.join(__dirname, "../config.json");
 
         if (fs.existsSync(configPath)) {
             try {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
                 if (config.bot?.prefix) prefix = config.bot.prefix;
-                if (config.bot?.language) currentLang = config.bot.language;
                 let rawOwners = [];
                 if (config.bot?.ownerNumber) rawOwners.push(String(config.bot.ownerNumber));
                 if (Array.isArray(config.bot?.owners)) rawOwners = rawOwners.concat(config.bot.owners);
@@ -26,13 +23,13 @@ module.exports = {
             }
         }
 
-        const t = langs[currentLang] || langs["en"];
-
         let senderJid = msg.key?.participant || msg.key?.remoteJid || sender || "";
         const senderNumber = String(senderJid).replace(/[^0-9]/g, "");
 
         if (owners.length > 0 && !owners.includes(senderNumber)) {
-            return await sock.sendMessage(sender, { text: `*${t.accessDenied}*` }, { quoted: msg });
+            return await sock.sendMessage(sender, { 
+                text: `*ACCESS DENIED / ACCESSO NEGATO:* You are not authorized!` 
+            }, { quoted: msg });
         }
 
         let targetInput = "";
@@ -46,12 +43,14 @@ module.exports = {
 
         if (!targetInput) {
             return await sock.sendMessage(sender, { 
-                text: `*✦ THE SYNDICATE ✦*\n\n${t.usageAdd}` 
+                text: `*✦ THE SYNDICATE ✦*\n\nUsage: ${prefix}adduser <number_or_mention>` 
             }, { quoted: msg });
         }
 
         if (owners.includes(targetInput)) {
-            return await sock.sendMessage(sender, { text: `*NOTICE:* Number ${targetInput} is already whitelisted.` }, { quoted: msg });
+            return await sock.sendMessage(sender, { 
+                text: `*NOTICE:* Number ${targetInput} is already whitelisted.` 
+            }, { quoted: msg });
         }
 
         try {
@@ -64,11 +63,15 @@ module.exports = {
 
             fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
 
-            await sock.sendMessage(sender, { text: `*${t.successAdd}* (${targetInput})` }, { quoted: msg });
+            await sock.sendMessage(sender, { 
+                text: `*SUCCESS:* Number ${targetInput} added successfully!` 
+            }, { quoted: msg });
 
         } catch (error) {
             console.error("Error updating config.json:", error);
-            await sock.sendMessage(sender, { text: `*ERROR:* Failed to save user number.` }, { quoted: msg });
+            await sock.sendMessage(sender, { 
+                text: `*ERROR:* Failed to save user number.` 
+            }, { quoted: msg });
         }
     }
-}; 
+};
