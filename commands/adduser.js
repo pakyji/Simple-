@@ -20,16 +20,29 @@ module.exports = {
             }
         }
 
-        // Pulizia corretta del numero del mittente per il confronto
-        const senderNumber = sender.replace(/[^0-9]/g, "");
-        
+        // Estrae il numero pulito del mittente dai dati del messaggio (remoteJid o sender)
+        let senderJid = msg.key?.participant || msg.key?.remoteJid || sender;
+        const senderNumber = String(senderJid).replace(/[^0-9]/g, "");
+
+        // STAMPA DI DEBUG NELLA CONSOLE DEL SERVER PER CONTROLLARE
+        console.log("--- DEBUG OWNER CHECK ---");
+        printDebug(`Mittente grezzo (sender): ${sender}`);
+        printDebug(`Mittente estratto (senderJid): ${senderJid}`);
+        printDebug(`Numero pulito del mittente: ${senderNumber}`);
+        printDebug(`Lista owner in config.json:`, owners);
+
+        function printDebug(label, data = "") {
+            console.log(label, data);
+        }
+
+        // Controllo accesso
         if (owners.length > 0 && !owners.includes(senderNumber)) {
             return await sock.sendMessage(sender, { 
-                text: `*ACCESS DENIED:* Only the bot owner can use this command!` 
+                text: `*ACCESS DENIED:* Your number (${senderNumber}) is not recognized as owner!` 
             }, { quoted: msg });
         }
 
-        // Controlla se è stata fatta una menzione oppure è stato scritto un numero neiargs
+        // Gestione del numero da aggiungere (tramite menzione o argomento diretto)
         let targetInput = "";
         const mentionedJids = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid;
         
