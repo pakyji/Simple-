@@ -20,39 +20,48 @@ module.exports = {
             }
         }
 
-        // Har language ke liye translations
+        // Expanded multilingual dictionary for common bot commands & categories
         const translations = {
             en: {
                 title: "MAIN MENU",
                 notFound: "No commands found or loaded.",
-                categories: { GENERAL: "GENERAL", TOOLS: "TOOLS" },
+                categories: { GENERAL: "GENERAL", TOOLS: "TOOLS", AI: "AI" },
                 descriptions: {
                     menu: "Shows the main command list",
                     setlang: "Change bot language (en/it/ur)",
                     adduser: "Add a new user to owners/whitelist",
-                    install: "Install a new plugin dynamically via raw URL"
+                    install: "Install a new plugin dynamically via raw URL",
+                    ai: "Chat with official Google Gemini AI",
+                    alive: "Check if the bot is online with latency",
+                    "99names": "Get one of the 99 Beautiful Names of Allah"
                 }
             },
             it: {
                 title: "MENU PRINCIPALE",
                 notFound: "Nessun comando trovato o caricato.",
-                categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI" },
+                categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI", AI: "INTELLIGENZA ARTIFICIALE" },
                 descriptions: {
                     menu: "Mostra la lista dei comandi principali",
                     setlang: "Cambia la lingua del bot (en/it/ur)",
                     adduser: "Aggiungi un nuovo utente ai proprietari",
-                    install: "Installa un nuovo plugin dinamicamente tramite URL"
+                    install: "Installa un nuovo plugin dinamicamente tramite URL",
+                    ai: "Chatta con l'IA ufficiale di Google Gemini",
+                    alive: "Verifica se il bot è online con la latenza",
+                    "99names": "Ottieni uno dei 99 Bellissimi Nomi di Allah"
                 }
             },
             ur: {
                 title: "مرکزی مینو",
                 notFound: "کوئی کمانڈ نہیں ملی۔",
-                categories: { GENERAL: "جنرل", TOOLS: "ٹولز" },
+                categories: { GENERAL: "جنرل", TOOLS: "ٹولز", AI: "اے آئی" },
                 descriptions: {
                     menu: "مین کمانڈ لسٹ دکھاتا ہے",
                     setlang: "بوٹ کی زبان تبدیل کریں (en/it/ur)",
                     adduser: "نیا یوزر اونرز لسٹ میں شامل کریں",
-                    install: "را یو آر ایل کے ذریعے نیا پلگ ان انسٹال کریں"
+                    install: "را یو آر ایل کے ذریعے نیا پلگ ان انسٹال کریں",
+                    ai: "گوگل جمنای اے آئی کے ساتھ چیٹ کریں",
+                    alive: "چیک کریں کہ بوٹ آن لائن ہے یا نہیں",
+                    "99names": "اللہ کے 99 پیارے ناموں میں سے ایک حاصل کریں"
                 }
             }
         };
@@ -75,11 +84,8 @@ module.exports = {
                             const cat = t.categories[rawCat] || rawCat;
                             if (!categories[cat]) categories[cat] = [];
                             
-                            // Translated description agar mojood ho toh wo use karein
-                            let desc = command.description || "";
-                            if (t.descriptions[command.name]) {
-                                desc = t.descriptions[command.name];
-                            }
+                            // Check dictionary for translated description, fallback to command's own description
+                            let desc = t.descriptions[command.name] || command.description || "";
                             
                             categories[cat].push({ name: command.name, description: desc });
                         }
