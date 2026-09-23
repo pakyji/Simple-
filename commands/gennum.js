@@ -24,22 +24,14 @@ module.exports = {
 
             // If country is not supported or not provided, show list of available options
             if (!countryFormats[query]) {
-                const responseText = `╭━━━〔 📱 *NUMBER GENERATOR* 📱 〕━━━⣣\n` +
-                                     `┃\n` +
-                                     `┃  ❌ *Invalid or missing country!*\n` +
-                                     `┃  💡 *Available options:*\n` +
-                                     `┃  • \`.gennum usa\`\n` +
-                                     `┃  • \`.gennum uk\`\n` +
-                                     `┃  • \`.gennum pakistan\`\n` +
-                                     `┃  • \`.gennum india\`\n` +
-                                     `┃  • \`.gennum italia\`\n` +
-                                     `┃\n` +
-                                     `┣──────────────────────────┫\n` +
-                                     `┃\n` +
-                                     `┃  🔗 *Discord Community:*\n` +
-                                     `┃  https://discord.gg/syndicateps\n` +
-                                     `┃\n` +
-                                     `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+                const responseText = 
+                    `Invalid or missing country.\n` +
+                    `Available options:\n` +
+                    `- .gennum usa\n` +
+                    `- .gennum uk\n` +
+                    `- .gennum pakistan\n` +
+                    `- .gennum india\n` +
+                    `- .gennum italia`;
                 
                 await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
                 return;
@@ -51,25 +43,17 @@ module.exports = {
             const generatedNumber = selected.format.replace(/#/g, () => Math.floor(Math.random() * 10));
 
             // Format success response message
-            const successText = `╭━━━〔 📱 *NUMBER GENERATOR* 📱 〕━━━⣣\n` +
-                                `┃\n` +
-                                `┃  🌍 *Country:* ${selected.name}\n` +
-                                `┃  📞 *Generated Number:* \`${generatedNumber}\`\n` +
-                                `┃  ⚠️ *Note:* For testing purposes only!\n` +
-                                `┃\n` +
-                                `┣──────────────────────────┫\n` +
-                                `┃\n` +
-                                `┃  🔗 *Discord Community:*\n` +
-                                `┃  https://discord.gg/syndicateps\n` +
-                                `┃\n` +
-                                `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const successText = 
+                `Country: ${selected.name}\n` +
+                `Generated Number: ${generatedNumber}\n` +
+                `Note: For testing purposes only.`;
 
             await sock.sendMessage(sender, { text: successText }, { quoted: msg });
 
         } catch (error) {
             // Log unexpected execution errors
             console.error("Gennum command error:", error);
-            await sock.sendMessage(sender, { text: "❌ Failed to generate number." }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "Failed to generate number." }, { quoted: msg });
         }
     }
 };
