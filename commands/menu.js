@@ -27,7 +27,7 @@ module.exports = {
                 try {
                     const command = require(path.join(commandsDir, file));
                     if (command.name) {
-                        const cat = (command.category || "General").toUpperCase();
+                        const cat = (command.category || "GENERAL").toUpperCase();
                         if (!categories[cat]) categories[cat] = [];
                         
                         categories[cat].push({
@@ -44,24 +44,29 @@ module.exports = {
         }
 
         let menuText = 
-            `*The Syndicate* // v2.5.0\n` +
-            `Prefix: [ ${prefix} ]\n` +
-            `Server: syndicateps\n\n`;
+            `┌─────────────────────────┐\n` +
+            `│    ✦ ᴛʜᴇ sʏɴᴅɪᴄᴀᴛᴇ ✦    │\n` +
+            `└─────────────────────────┘\n` +
+            `│ Prefix  : ${prefix}\n` +
+            `│ Version : 2.5.0\n` +
+            `│ Server  : https://discord.gg/syndicateps\n` +
+            `╰─────────────────────────╯\n\n`;
 
         // Sort categories alphabetically
         const sortedCategories = Object.keys(categories).sort();
 
         for (const cat of sortedCategories) {
-            menuText += `${cat}\n`;
+            menuText += `╭── [ ${cat} ]\n`;
             
             // Sort commands inside category
             categories[cat].sort((a, b) => a.name.localeCompare(b.name));
 
             for (const cmd of categories[cat]) {
-                const desc = cmd.description ? ` — ${cmd.description}` : "";
-                menuText += `- ${cmd.name}${desc}\n`;
+                const desc = cmd.description ? `  ${cmd.description}` : "";
+                menuText += `│ • ${prefix}${cmd.name}${desc}\n`;
+                menuText += `│ \n`; // Har command ke niche thora sa space
             }
-            menuText += `\n`;
+            menuText += `╰═════════════════════════╯\n\n`;
         }
 
         await sock.sendMessage(sender, { text: menuText.trim() }, { quoted: msg });
