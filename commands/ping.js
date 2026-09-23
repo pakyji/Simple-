@@ -83,19 +83,12 @@ module.exports = {
             const allComments = [...urduFunnyComments, ...englishFunnyComments];
             const randomComment = allComments[Math.floor(Math.random() * allComments.length)];
 
-            const responseText = `╭━━━〔 🏓 *PONG* 🏓 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  ⚡ *Latency:* ${latency}ms\n` +
-                                 `┃  💬 *Remark:* ${randomComment}\n` +
-                                 `┃\n` +
-                                 `┣──────────────────────────┫\n` +
-                                 `┃\n` +
-                                 `┃  🔗 *Discord Community:*\n` +
-                                 `┃  https://discord.gg/syndicateps\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const responseText = 
+                `🏓 PONG 🏓\n\n` +
+                `⚡ Latency: ${latency}ms\n` +
+                `💬 Remark: ${randomComment}`;
 
-            // Edit or send the final response
+            // Send the final response
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
         } catch (error) {
