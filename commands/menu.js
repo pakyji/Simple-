@@ -3,31 +3,30 @@ const path = require("path");
 
 module.exports = {
     name: "menu",
-    description: "Show this command list",
+    description: "Displays the simple command menu",
     async execute(sock, msg, sender, args) {
-        const commandFiles = fs.readdirSync(__dirname).filter(file => file.endsWith(".js"));
+        let prefix = ",";
+        let userName = msg.pushName || "User";
         
-        let menuText = `╭━━━〔 ⚡ *THE SYNDICATE* ⚡ 〕━━━⬣\n`;
-        menuText += `┃\n`;
-        menuText += `┃  👋 *Hello! Command Center:*\n`;
-        menuText += `┃\n`;
-
-        // Dynamic command loader loop
-        for (const file of commandFiles) {
-            const command = require(`./${file}`);
-            if (command.name) {
-                const desc = command.description ? `\n     ↳ ${command.description}` : "";
-                menuText += `┃  📌 *${command.name}*${desc}\n`;
+        const configPath = path.join(__dirname, "../config.json");
+        if (fs.existsSync(configPath)) {
+            try {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                if (config.bot?.prefix) prefix = config.bot.prefix;
+            } catch (e) {
+                console.error("Error reading config.json:", e);
             }
         }
 
-        menuText += `┃\n`;
-        menuText += `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⬡\n\n`;
-        
-        // Permanent Community Footer
-        menuText += `👑 *BOT OWNER & COMMUNITY*\n`;
-        menuText += `🤖 *Bot Developer / Join Us*\n`;
-        menuText += `💬 *Discord:* https://discord.gg/syndicateps`;
+        const menuText = 
+            `Syndicate\n` +
+            `User: ${userName}\n\n` +
+            `- ${prefix}ai <query>\n` +
+            `- ${prefix}gemini <prompt>\n` +
+            `- ${prefix}menu\n` +
+            `- ${prefix}ping\n` +
+            `- ${prefix}broadcast <msg>\n\n` +
+            `https://discord.gg/syndicateps`;
 
         await sock.sendMessage(sender, { text: menuText }, { quoted: msg });
     }
