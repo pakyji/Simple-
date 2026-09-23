@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const langs = require("../languages");
 
 module.exports = {
     name: "setlang",
@@ -26,20 +25,20 @@ module.exports = {
             }
         }
 
-        const t = langs[currentLang] || langs["en"];
-
         let senderJid = msg.key?.participant || msg.key?.remoteJid || sender || "";
         const senderNumber = String(senderJid).replace(/[^0-9]/g, "");
 
         if (owners.length > 0 && !owners.includes(senderNumber)) {
-            return await sock.sendMessage(sender, { text: `*${t.accessDenied}*` }, { quoted: msg });
+            return await sock.sendMessage(sender, { 
+                text: `*ACCESS DENIED / ACCESSO NEGATO:* You are not authorized!` 
+            }, { quoted: msg });
         }
 
         const targetLang = args && args[0] ? args[0].toLowerCase() : "";
 
         if (!["en", "it", "ur"].includes(targetLang)) {
             return await sock.sendMessage(sender, { 
-                text: `*✦ THE SYNDICATE ✦*\n\nUsage: ${prefix}setlang <en/it/ur>\nCurrent: ${currentLang}` 
+                text: `*✦ THE SYNDICATE ✦*\n\nUsage: ${prefix}setlang <en/it/ur>\nCurrent Language: ${currentLang}` 
             }, { quoted: msg });
         }
 
@@ -50,12 +49,15 @@ module.exports = {
 
             fs.writeFileSync(configPath, JSON.stringify(configData, null, 2), 'utf8');
 
-            const newT = langs[targetLang];
-            await sock.sendMessage(sender, { text: `*SUCCESS:* ${newT.successLang}` }, { quoted: msg });
+            await sock.sendMessage(sender, { 
+                text: `*SUCCESS / SUCCESSO:* Bot language successfully changed to: *${targetLang.toUpperCase()}*` 
+            }, { quoted: msg });
 
         } catch (error) {
             console.error("Error updating language:", error);
-            await sock.sendMessage(sender, { text: `*ERROR:* Failed to update language.` }, { quoted: msg });
+            await sock.sendMessage(sender, { 
+                text: `*ERROR:* Failed to update bot language.` 
+            }, { quoted: msg });
         }
     }
 };
