@@ -20,18 +20,11 @@ module.exports = {
 
             const ytUrl = args[0];
 
-            // Send initial processing notification with Discord footer
-            const responseText = `╭━━━〔 📥 *YT-MP4 DOWNLOADER* 📥 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  ⏳ *Processing video request...*\n` +
-                                 `┃  🔗 *URL:* ${ytUrl}\n` +
-                                 `┃\n` +
-                                 `┣──────────────────────────┫\n` +
-                                 `┃\n` +
-                                 `┃  🔗 *Discord Community:*\n` +
-                                 `┃  https://discord.gg/syndicateps\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            // Format response message with clean plain text and emojis
+            const responseText = 
+                `📥 YT-MP4 DOWNLOADER 📥\n\n` +
+                `⏳ Processing video request...\n` +
+                `🔗 URL: ${ytUrl}`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
