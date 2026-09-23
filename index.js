@@ -126,14 +126,26 @@ async function startBot() {
         }
 
         // ==========================
-        // 4. COMMAND DISPATCHER
+        // 4. COMMAND DISPATCHER (Dynamic Prefix)
         // ==========================
         const trimmedText = messageText.trim();
-        // Assuming your prefix is "." (if message starts with .)
-        if (!trimmedText.startsWith(".")) return;
 
-        const args = trimmedText.slice(1).trim().split(/ +/);
-        const commandName = args.shift().toLowerCase(); // Case-insensitive lookup fix
+        // Read prefix dynamically from config.json (Default is ".")
+        let currentPrefix = ".";
+        const configPath = path.join(__dirname, 'config.json');
+        if (fs.existsSync(configPath)) {
+            try {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                if (config.prefix) currentPrefix = config.prefix;
+            } catch (e) {
+                console.error("Error reading config.json:", e);
+            }
+        }
+
+        if (!trimmedText.startsWith(currentPrefix)) return;
+
+        const args = trimmedText.slice(currentPrefix.length).trim().split(/ +/);
+        const commandName = args.shift().toLowerCase();
 
         if (commands.has(commandName)) {
             try {
