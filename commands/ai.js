@@ -1,37 +1,55 @@
-const axios = require("axios");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
     name: "ai",
-    description: "Chat with AI assistant",
+    description: "Chat with official Google Gemini AI using secure environment/config keys",
     async execute(sock, msg, sender, args) {
         const query = args.join(" ");
         
         if (!query) {
-            const usageText = `╭━━━〔 🤖 *AI ASSISTANT* 〕━━━⣣\n` +
+            const usageText = `╭━━━〔 🤖 *GEMINI AI* 〕━━━⣣\n` +
                               `┃\n` +
-                              `┃  ⚠️ Please provide a question!\n` +
+                              `┃  ⚠️ Please provide a prompt!\n` +
                               `┃  💡 *Usage:* ,ai kesi ho?\n` +
                               `┃\n` +
                               `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
             return await sock.sendMessage(sender, { text: usageText }, { quoted: msg });
         }
 
+        // 1. Fetch API Key securely from Environment Variable or config.json
+        let apiKey = process.env.GEMINI_API_KEY;
+
+        if (!apiKey) {
+            const configPath = path.join(__dirname, "../config.json");
+            if (fs.existsSync(configPath)) {
+                try {
+                    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                    apiKey = config.apis?.geminiKey || config.geminiKey;
+                } catch (e) {
+                    console.error("Error reading config.json for API key:", e);
+                }
+            }
+        }
+
+        if (!apiKey) {
+            return await sock.sendMessage(sender, { 
+                text: `❌ Gemini API Key is not configured in environment variables or config.json!` 
+            }, { quoted: msg });
+        }
+
         await sock.sendMessage(sender, { text: `🤖 *Thinking...*` }, { quoted: msg });
 
         try {
-            // Using a stable alternative free endpoint
-            const response = await axios.get(`https://bk9.fun/ai/gemini?q=${encodeURIComponent(query)}`);
-            
-            let replyText = response.data?.result || response.data?.data || response.data?.gpt;
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(query);
+            const response = await result.response;
+            const replyText = response.text();
 
             if (!replyText) {
-                // Fallback secondary public api if first fails
-                const altResponse = await axios.get(`https://api.giftedtech.my.id/api/ai/geminiai?apikey=gifted&q=${encodeURIComponent(query)}`);
-                replyText = altResponse.data?.result || altResponse.data?.response;
-            }
-
-            if (!replyText) {
-                throw new Error("No response from AI servers.");
+                throw new Error("Empty response from Gemini.");
             }
 
             const finalResponse = `╭━━━〔 🤖 *AI RESPONSE* 〕━━━⣣\n` +
@@ -43,9 +61,9 @@ module.exports = {
             await sock.sendMessage(sender, { text: finalResponse }, { quoted: msg });
 
         } catch (error) {
-            console.error("❌ AI Command Error:", error);
+            console.error("❌ Gemini API Error:", error);
             await sock.sendMessage(sender, { 
-                text: `❌ AI service is currently busy. Please try again in a moment!` 
+                text: `❌ Error communicating with Gemini API. Please check your API key!` 
             }, { quoted: msg });
         }
     }
