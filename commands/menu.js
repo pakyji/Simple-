@@ -20,12 +20,12 @@ module.exports = {
             }
         }
 
-        // Expanded multilingual dictionary for common bot commands & categories
+        // Complete Multi-language dictionary for all commands & categories
         const translations = {
             en: {
                 title: "MAIN MENU",
                 notFound: "No commands found or loaded.",
-                categories: { GENERAL: "GENERAL", TOOLS: "TOOLS", AI: "AI" },
+                categories: { GENERAL: "GENERAL", TOOLS: "TOOLS", AI: "AI", GROUP: "GROUP" },
                 descriptions: {
                     menu: "Shows the main command list",
                     setlang: "Change bot language (en/it/ur)",
@@ -33,13 +33,16 @@ module.exports = {
                     install: "Install a new plugin dynamically via raw URL",
                     ai: "Chat with official Google Gemini AI",
                     alive: "Check if the bot is online with latency",
-                    "99names": "Get one of the 99 Beautiful Names of Allah"
+                    "99names": "Get one of the 99 Beautiful Names of Allah",
+                    anon: "Send an anonymous message to someone",
+                    antilink: "Enable or disable anti-link protection in the group",
+                    ascii: "Convert text into ASCII cool stylish art"
                 }
             },
             it: {
                 title: "MENU PRINCIPALE",
                 notFound: "Nessun comando trovato o caricato.",
-                categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI", AI: "INTELLIGENZA ARTIFICIALE" },
+                categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI", AI: "INTELLIGENZA ARTIFICIALE", GROUP: "GRUPPO" },
                 descriptions: {
                     menu: "Mostra la lista dei comandi principali",
                     setlang: "Cambia la lingua del bot (en/it/ur)",
@@ -47,13 +50,16 @@ module.exports = {
                     install: "Installa un nuovo plugin dinamicamente tramite URL",
                     ai: "Chatta con l'IA ufficiale di Google Gemini",
                     alive: "Verifica se il bot è online con la latenza",
-                    "99names": "Ottieni uno dei 99 Bellissimi Nomi di Allah"
+                    "99names": "Ottieni uno dei 99 Bellissimi Nomi di Allah",
+                    anon: "Invia un messaggio anonimo a qualcuno",
+                    antilink: "Abilita o disabilita la protezione anti-link nel gruppo",
+                    ascii: "Converti il testo in fantastica grafica ASCII"
                 }
             },
             ur: {
                 title: "مرکزی مینو",
                 notFound: "کوئی کمانڈ نہیں ملی۔",
-                categories: { GENERAL: "جنرل", TOOLS: "ٹولز", AI: "اے آئی" },
+                categories: { GENERAL: "جنرل", TOOLS: "ٹولز", AI: "اے آئی", GROUP: "گروپ" },
                 descriptions: {
                     menu: "مین کمانڈ لسٹ دکھاتا ہے",
                     setlang: "بوٹ کی زبان تبدیل کریں (en/it/ur)",
@@ -61,7 +67,10 @@ module.exports = {
                     install: "را یو آر ایل کے ذریعے نیا پلگ ان انسٹال کریں",
                     ai: "گوگل جمنای اے آئی کے ساتھ چیٹ کریں",
                     alive: "چیک کریں کہ بوٹ آن لائن ہے یا نہیں",
-                    "99names": "اللہ کے 99 پیارے ناموں میں سے ایک حاصل کریں"
+                    "99names": "اللہ کے 99 پیارے ناموں میں سے ایک حاصل کریں",
+                    anon: "کسی کو گمنام پیغام بھیجیں",
+                    antilink: "گروپ میں اینٹی لنک پروٹیکشن آن یا آف کریں",
+                    ascii: "ٹیکسٹ کو خوبصورت ASCII آرٹ میں تبدیل کریں"
                 }
             }
         };
@@ -84,7 +93,7 @@ module.exports = {
                             const cat = t.categories[rawCat] || rawCat;
                             if (!categories[cat]) categories[cat] = [];
                             
-                            // Check dictionary for translated description, fallback to command's own description
+                            // Smart translation lookup with fallback to command file description
                             let desc = t.descriptions[command.name] || command.description || "";
                             
                             categories[cat].push({ name: command.name, description: desc });
