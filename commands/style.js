@@ -28,21 +28,14 @@ module.exports = {
                 sans: inputTxt.replace(/[a-zA-Z]/g, c => String.fromCodePoint(c.charCodeAt(0) + (c <= 'Z' ? 120383 : 120379)))
             };
 
-            // Format response message
-            const responseText = `╭━━━〔 ✒️ *NAME STYLES* ✒️ 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  🔤 *Original:* ${inputTxt}\n` +
-                                 `┃  🔹 *Bold:* ${fonts.bold}\n` +
-                                 `┃  🔹 *Italic:* ${fonts.italic}\n` +
-                                 `┃  🔹 *Script:* ${fonts.script}\n` +
-                                 `┃  🔹 *Sans:* ${fonts.sans}\n` +
-                                 `┃\n` +
-                                 `┣──────────────────────────┫\n` +
-                                 `┃\n` +
-                                 `┃  🔗 *Discord Community:*\n` +
-                                 `┃  https://discord.gg/syndicateps\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            // Format response message with clean plain text and emojis
+            const responseText = 
+                `✒️ NAME STYLES ✒️\n\n` +
+                `🔤 Original: ${inputTxt}\n` +
+                `🔹 Bold: ${fonts.bold}\n` +
+                `🔹 Italic: ${fonts.italic}\n` +
+                `🔹 Script: ${fonts.script}\n` +
+                `🔹 Sans: ${fonts.sans}`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
