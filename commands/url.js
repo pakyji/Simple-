@@ -21,20 +21,17 @@ module.exports = {
             const isQuotedImage = quotedMessage?.imageMessage;
 
             if (!isDirectImage && !isQuotedImage) {
-                const helpText = `╭━━━〔 🔗 *IMAGE URL GENERATOR* 🔗 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  ❌ *No image detected!* \n` +
-                                 `┃  💡 *How to use:*\n` +
-                                 `┃  • Send an image with caption \`.url\`\n` +
-                                 `┃  • Or reply to any image with \`.url\`\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+                const helpText = 
+                    `No image detected!\n` +
+                    `How to use:\n` +
+                    `- Send an image with caption .url\n` +
+                    `- Or reply to any image with .url`;
                 
                 await sock.sendMessage(sender, { text: helpText }, { quoted: msg });
                 return;
             }
 
-            await sock.sendMessage(sender, { text: "⏳ *Uploading image to get public URL...*" }, { quoted: msg });
+            await sock.sendMessage(sender, { text: "⏳ Uploading image to get public URL..." }, { quoted: msg });
 
             // Download media buffer safely using Baileys
             const buffer = await downloadMediaMessage(
@@ -73,14 +70,11 @@ module.exports = {
             }
 
             // Format final response
-            const resultText = `╭━━━〔 🔗 *IMAGE URL* 🔗 〕━━━⣣\n` +
-                               `┃\n` +
-                               `┃  ✅ *Uploaded successfully!*\n` +
-                               `┃\n` +
-                               `┃  📥 *Direct URL:*\n` +
-                               `┃  \`${imageUrl}\`\n` +
-                               `┃\n` +
-                               `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            const resultText = 
+                `🔗 IMAGE URL 🔗\n\n` +
+                `✅ Uploaded successfully!\n\n` +
+                `📥 Direct URL:\n` +
+                `${imageUrl}`;
 
             await sock.sendMessage(sender, { text: resultText }, { quoted: msg });
 
