@@ -45,12 +45,13 @@ module.exports = {
 
         let menuText = 
             `┌─────────────────────────┐\n` +
-            `│    ✦ ᴛʜᴇ sʏɴᴅɪᴄᴀᴛᴇ ✦    │\n` +
+            `│   ✦ THE SYNDICATE ✦   │\n` +
             `└─────────────────────────┘\n` +
+            `┌─────────────────────────┐\n` +
             `│ Prefix  : ${prefix}\n` +
             `│ Version : 2.5.0\n` +
             `│ Server  : https://discord.gg/syndicateps\n` +
-            `╰─────────────────────────╯\n\n`;
+            `└─────────────────────────┘\n\n`;
 
         // Sort categories alphabetically
         const sortedCategories = Object.keys(categories).sort();
@@ -64,7 +65,7 @@ module.exports = {
             for (const cmd of categories[cat]) {
                 const desc = cmd.description ? `  ${cmd.description}` : "";
                 menuText += `│ • ${prefix}${cmd.name}${desc}\n`;
-                menuText += `│ \n`; // Har command ke niche thora sa space
+                menuText += `│ \n`;
             }
             menuText += `╰═════════════════════════╯\n\n`;
         }
