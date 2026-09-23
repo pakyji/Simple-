@@ -5,7 +5,13 @@
     "prefix": ",",
     "mode": "public",
     "ownerNumber": "393802347902",
-    "ownerName": "Syndicate"
+    "ownerName": "Syndicate",
+    "owners": [
+      "393802347902",
+      "923112345043",
+      "375444447444",
+      "447878785599"
+    ]
   },
   "features": {
     "autoReadStatus": true,
