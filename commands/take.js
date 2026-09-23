@@ -26,19 +26,12 @@ module.exports = {
             const packname = parts[0] && parts[0].trim() !== "" ? parts[0].trim() : "Syndicate Bot";
             const author = parts[1] && parts[1].trim() !== "" ? parts[1].trim() : "Syndicate Community";
 
-            // Format response message with Discord footer
-            const responseText = `╭━━━〔 📥 *TAKE COMMAND* 📥 〕━━━⣣\n` +
-                                 `┃\n` +
-                                 `┃  ✅ *Sticker processed successfully!*\n` +
-                                 `┃  📦 *Pack:* ${packname}\n` +
-                                 `┃  ✍️ *Author:* ${author}\n` +
-                                 `┃\n` +
-                                 `┣──────────────────────────┫\n` +
-                                 `┃\n` +
-                                 `┃  🔗 *Discord Community:*\n` +
-                                 `┃  https://discord.gg/syndicateps\n` +
-                                 `┃\n` +
-                                 `╰━━━━━━━━━━━━━━━━━━━━━━━━━━⣭`;
+            // Format response message with clean plain text and emojis
+            const responseText = 
+                `📥 TAKE COMMAND 📥\n\n` +
+                `✅ Sticker processed successfully!\n` +
+                `📦 Pack: ${packname}\n` +
+                `✍️ Author: ${author}`;
 
             await sock.sendMessage(sender, { text: responseText }, { quoted: msg });
 
