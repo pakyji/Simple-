@@ -43,31 +43,32 @@ module.exports = {
             console.error("Error reading commands folder:", e);
         }
 
+        // Header principale in stile box chiuso con separatore
         let menuText = 
-            `┌─────────────────────────┐\n` +
-            `│   ✦ THE SYNDICATE ✦   │\n` +
-            `└─────────────────────────┘\n` +
-            `┌─────────────────────────┐\n` +
-            `│ Prefix  : ${prefix}\n` +
-            `│ Version : 2.5.0\n` +
-            `│ Server  : https://discord.gg/syndicateps\n` +
-            `└─────────────────────────┘\n\n`;
+            `╔════════════════════════════╗\n` +
+            `║     ✦ THE SYNDICATE ✦      ║\n` +
+            `╠════════════════════════════╣\n` +
+            `║ PREFIX  :: ${prefix.padEnd(16)}║\n` +
+            `║ VERSION :: 2.5.0           ║\n` +
+            `║ SERVER  :: discord.gg/     ║\n` +
+            `║           syndicateps      ║\n` +
+            `╚════════════════════════════╝\n\n`;
 
         // Sort categories alphabetically
         const sortedCategories = Object.keys(categories).sort();
 
         for (const cat of sortedCategories) {
-            menuText += `╭── [ ${cat} ]\n`;
+            // Intestazione della categoria con box e angoli spessi
+            menuText += `┏━━━━━━━〔 ${cat} 〕━━━━━━━┓\n\n`;
             
             // Sort commands inside category
             categories[cat].sort((a, b) => a.name.localeCompare(b.name));
 
             for (const cmd of categories[cat]) {
-                const desc = cmd.description ? `  ${cmd.description}` : "";
-                menuText += `│ • ${prefix}${cmd.name}${desc}\n`;
-                menuText += `│ \n`;
+                const desc = cmd.description ? `\n┃   └─ ${cmd.description}` : "";
+                menuText += `┃◈ ${prefix}${cmd.name}${desc}\n┃\n`;
             }
-            menuText += `╰═════════════════════════╯\n\n`;
+            menuText += `┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
         }
 
         await sock.sendMessage(sender, { text: menuText.trim() }, { quoted: msg });
