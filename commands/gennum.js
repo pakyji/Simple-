@@ -16,7 +16,8 @@ module.exports = {
                 "uk": { name: "United Kingdom", code: "+44", format: "+44 7911 ######" },
                 "pakistan": { name: "Pakistan", code: "+92", format: "+92 3## #######" },
                 "india": { name: "India", code: "+91", format: "+91 9### ######" },
-                "italy": { name: "Italy", code: "+39", format: "+39 3## #######" }
+                "italy": { name: "Italy", code: "+39", format: "+39 3## #######" },
+                "italia": { name: "Italy", code: "+39", format: "+39 3## #######" }
             };
 
             const query = args[0] ? args[0].toLowerCase() : "";
