@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 const pino = require("pino");
 const { getGroupSettings } = require("./utils/settings");
-const { translateText } = require("./translator"); // 👈 Yahan translator import kar liya hai
-const { runStartupScan } = require("./utils/startup-scanner"); // 👈 Modularized startup scanner imported from utils/
+const { translateText } = require("./translator"); 
+const { runStartupScan } = require("./utils/startup-scanner"); 
 
 // ==========================
 // 1. CONFIG LOADER (Nested Structure Support)
@@ -47,11 +47,10 @@ async function startBot() {
         browser: [ "Chrome", "Safari", "12.0.0" ]
     });
 
-    // 💡 Wrapper function jo automatically har message ko active language mein translate kar dega
     const originalSendMessage = sock.sendMessage.bind(sock);
     sock.sendMessage = async (jid, content, options) => {
         if (content && typeof content === 'object' && content.text) {
-            content.text = translateText(content.text); // Automatically translate text content
+            content.text = translateText(content.text);
         } else if (content && typeof content === 'string') {
             content = translateText(content);
         }
@@ -83,8 +82,6 @@ async function startBot() {
             if (shouldReconnect) startBot();
         } else if (connection === "open") {
             console.log("🚀 Bot is online and connected successfully!");
-            
-            // --- RUN STARTUP SCAN AUTOMATICALLY ON BOOT ---
             runStartupScan();
         }
     });
@@ -98,7 +95,6 @@ async function startBot() {
         const msg = messages[0];
         if (!msg || !msg.key) return;
 
-        // Auto Read Status if enabled in config
         if (msg.key.remoteJid === "status@broadcast") {
             if (config.features?.autoReadStatus !== false) {
                 try {
@@ -178,13 +174,12 @@ async function startBot() {
 
         if (!usedPrefix) return;
 
-        // Mode Check (Public / Private)
         const currentMode = config.bot?.mode || "public";
         const ownerJid = (config.bot?.ownerNumber || "393802347902") + "@s.whatsapp.net";
         const isOwner = sender === ownerJid || msg.key.fromMe;
 
         if (currentMode === "private" && !isOwner) {
-            return; // Agar private mode hai aur sender owner nahi hai, toh command ignore kar do
+            return; 
         }
 
         const args = trimmedText.slice(usedPrefix.length).trim().split(/ +/);
@@ -194,7 +189,6 @@ async function startBot() {
             try {
                 console.log(`⚡ Executing command: ${commandName}`);
                 
-                // Optional Auto Typing simulation if enabled
                 if (config.features?.autoTyping) {
                     await sock.sendPresenceUpdate('composing', sender);
                 }
@@ -208,4 +202,4 @@ async function startBot() {
     });
 }
 
-startBot();
+startBot()
