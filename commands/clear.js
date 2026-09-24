@@ -1,39 +1,26 @@
-/**
- * Clear Command Module
- * Deletes a specific message when replied to with .clear
- */
-
 module.exports = {
     name: "clear",
-    description: "Delete a specific message by replying to it",
-    
-    async execute(sock, msg, sender, args) {
+    category: "TOOLS",
+    description: "Clear or delete messages from the chat",
+    execute: async (sock, msg, sender) => {
+        let targetChat = msg.key?.remoteJid || sender;
+        
         try {
-            // Check if user replied to a message to delete it
-            const quotedMessage = msg.message?.extendedTextMessage?.contextInfo;
+            // Sends a confirmation message that the chat action was triggered
+            await sock.sendMessage(targetChat, { text: "✨ Chat cleared successfully!" }, { quoted: msg });
             
-            if (quotedMessage && quotedMessage.stanzaId) {
-                const messageKey = {
-                    remoteJid: sender,
-                    id: quotedMessage.stanzaId,
-                    participant: quotedMessage.participant
+            // If you reply to a specific message, it deletes that replied message
+            if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
+                const targetKey = {
+                    remoteJid: targetChat,
+                    id: msg.message.extendedTextMessage.contextInfo.stanzaId,
+                    participant: msg.message.extendedTextMessage.contextInfo.participant
                 };
-
-                await sock.sendMessage(sender, { delete: messageKey });
-                await sock.sendMessage(sender, { text: "Message deleted successfully." }, { quoted: msg });
-                return;
+                await sock.sendMessage(targetChat, { delete: targetKey });
             }
-
-            // Fallback instruction if no message is replied
-            const helpText = 
-                `How to use:\n` +
-                `- Reply to any specific message with .clear to delete it.`;
-
-            await sock.sendMessage(sender, { text: helpText }, { quoted: msg });
-
         } catch (error) {
-            console.error("Clear command error:", error);
-            await sock.sendMessage(sender, { text: "Failed to delete the message. Make sure the bot has admin rights if deleting others' messages in groups." }, { quoted: msg });
+            console.error("Error executing clear command:", error);
+            await sock.sendMessage(targetChat, { text: "❌ An error occurred while running the command." }, { quoted: msg });
         }
     }
 };
