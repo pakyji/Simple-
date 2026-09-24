@@ -162,7 +162,7 @@ async function startBot() {
         }
 
         // ==========================
-        // 5. COMMAND DISPATCHER (Flexible Prefix for . and ,)
+        // 5. COMMAND DISPATCHER (Flexible Prefix with Mode Check)
         // ==========================
         const trimmedText = messageText.trim();
         const configuredPrefix = config.bot?.prefix || ",";
@@ -177,6 +177,15 @@ async function startBot() {
         }
 
         if (!usedPrefix) return;
+
+        // Mode Check (Public / Private)
+        const currentMode = config.bot?.mode || "public";
+        const ownerJid = (config.bot?.ownerNumber || "393802347902") + "@s.whatsapp.net";
+        const isOwner = sender === ownerJid || msg.key.fromMe;
+
+        if (currentMode === "private" && !isOwner) {
+            return; // Agar private mode hai aur sender owner nahi hai, toh command ignore kar do
+        }
 
         const args = trimmedText.slice(usedPrefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
