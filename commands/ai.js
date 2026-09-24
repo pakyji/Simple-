@@ -6,7 +6,7 @@ module.exports = {
     async execute(sock, msg, sender, args) {
         if (!args.length) {
             return await sock.sendMessage(sender, { 
-                text: "⚠️ Please provide a prompt or question! Example: `,ai Whatis Syndicate?`" 
+                text: "⚠️ Please provide a prompt or question! Example: `,ai What is Syndicate?`" 
             }, { quoted: msg });
         }
 
