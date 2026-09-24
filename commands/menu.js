@@ -20,165 +20,44 @@ module.exports = {
             }
         }
 
-        // Mukammal Multi-language dictionary (EN, IT, UR)
+        // Helper function to convert normal text into small caps / stylish bold sans-serif
+        function fancyFont(text) {
+            const normal = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            const fancy =  "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝙹🇷🇸𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
+            // Using standard unicode mathematical sans-serif map fallback if needed
+            const map = {
+                'A': '𝙰', 'B': '𝙱', 'C': '𝙲', 'D': '𝙳', 'E': '𝙴', 'F': '𝙵', 'G': '𝙶', 'H': '𝙷', 'I': '𝙸', 'J': '𝙹', 'K': '𝙺', 'L': '𝙻', 'M': '𝙼', 'N': '𝙽', 'O': '𝙾', 'P': '𝙿', 'Q': '𝚀', 'R': '𝚁', 'S': '𝚂', 'T': '𝚃', 'U': '𝚄', 'V': '𝚅', 'W': '𝚆', 'X': '𝚇', 'Y': '𝚈', 'Z': '𝚉',
+                'a': '𝚊', 'b': '𝚋', 'c': '𝚌', 'd': '𝚍', 'e': '𝚎', 'f': '𝚏', 'g': '𝚐', 'h': '𝚑', 'i': '𝚒', 'j': '𝚓', 'k': '𝚔', 'l': '𝚕', 'm': '𝚖', 'n': '𝚗', 'o': '𝚘', 'p': '𝚙', 'q': '𝚚', 'r': '𝚛', 's': '𝚜', 't': '𝚝', 'u': '𝚞', 'v': '𝚟', 'w': '𝚠', 'x': '𝚡', 'y': '𝚢', 'z': '𝚣',
+                '0': '𝟶', '1': '𝟷', '2': '𝟸', '3': '𝟹', '4': '𝟺', '5': '𝟻', '6': '𝟼', '7': '𝟽', '8': '𝟾', '9': '𝟿'
+            };
+            return text.split('').map(char => map[char] || char).join('');
+        }
+
+        // Dynamic Time & Date details
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const dayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
+        const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY format
+
+        // User profile name or pushName fallback
+        const pushName = msg.pushName || "USER";
+
         const translations = {
             en: {
-                title: "MAIN MENU",
-                notFound: "No commands found or loaded.",
                 categories: { GENERAL: "GENERAL", TOOLS: "TOOLS", AI: "AI", GROUP: "GROUP" },
-                descriptions: {
-                    menu: "Shows the main command list",
-                    setlang: "Change bot language (en/it/ur)",
-                    adduser: "Add a new user to owners/whitelist",
-                    install: "Install a new plugin dynamically via raw URL",
-                    ai: "Chat with official Google Gemini AI",
-                    alive: "Check if the bot is online with latency",
-                    "99names": "Get one of the 99 Beautiful Names of Allah",
-                    anon: "Send an anonymous message to someone",
-                    antilink: "Enable or disable anti-link protection in the group",
-                    ascii: "Convert text into ASCII cool stylish art",
-                    broadcast: "Broadcast message to all chats while excluding specific JIDs",
-                    calc: "Perform mathematical calculations",
-                    cat: "Get a random cute cat image",
-                    clear: "Delete a specific message by replying to it",
-                    dog: "Get a random cute dog image",
-                    dua: "Get a daily Islamic Dua",
-                    fact: "Get a random interesting fact",
-                    fancy: "Convert normal text into stylish fonts and decorations",
-                    flip: "Flip text upside down",
-                    gennum: "Generate a mock/dummy phone number for a specific country",
-                    gta: "Get the latest GTA Online weekly update details and bonuses",
-                    hack: "Run a fake funny hacking simulation",
-                    hadith: "Get a random Hadith",
-                    hidetag: "Tag all group members invisibly with a message",
-                    islamicdate: "Get current Hijri/Islamic date",
-                    meme: "Get a random funny meme",
-                    owner: "Shows the bot community link",
-                    pickup: "Get a funny pickup line",
-                    ping: "Check bot latency and response speed with funny remarks",
-                    poll: "Create a voting poll",
-                    prefix: "Change the command prefix of the bot",
-                    quote: "Get an inspirational quote",
-                    quran: "Get a random Quranic Ayah translation",
-                    roast: "Send a light, funny roast",
-                    sticker: "Convert any image into a WhatsApp sticker",
-                    style: "Convert text or names into stylish fonts",
-                    tagall: "Mention all members in the group",
-                    take: "Steal or rename a sticker's pack name and author",
-                    time: "Get live time, code, and weather for any country",
-                    translate: "Translate text to any language",
-                    url: "Convert an image into a public URL",
-                    vaporwave: "Convert text to aesthetic vaporwave style",
-                    weather: "Get real-time weather details for any city",
-                    ytmp3: "Download audio from YouTube video links"
-                }
+                notFound: "No commands found or loaded."
             },
             it: {
-                title: "MENU PRINCIPALE",
-                notFound: "Nessun comando trovato o caricato.",
                 categories: { GENERAL: "GENERALE", TOOLS: "STRUMENTI", AI: "INTELLIGENZA ARTIFICIALE", GROUP: "GRUPPO" },
-                descriptions: {
-                    menu: "Mostra la lista dei comandi principali",
-                    setlang: "Cambia la lingua del bot (en/it/ur)",
-                    adduser: "Aggiungi un nuovo utente ai proprietari",
-                    install: "Installa un nuovo plugin dinamicamente tramite URL",
-                    ai: "Chatta con l'IA ufficiale di Google Gemini",
-                    alive: "Verifica se il bot è online con la latenza",
-                    "99names": "Ottieni uno dei 99 Bellissimi Nomi di Allah",
-                    anon: "Invia un messaggio anonimo a qualcuno",
-                    antilink: "Abilita o disabilita la protezione anti-link nel gruppo",
-                    ascii: "Converti il testo in fantastica grafica ASCII",
-                    broadcast: "Invia un messaggio broadcast a tutte le chat",
-                    calc: "Esegui calcoli matematici",
-                    cat: "Ottieni un'immagine di un gattino carino",
-                    clear: "Elimina un messaggio specifico rispondendovi",
-                    dog: "Ottieni un'immagine di un cane carino",
-                    dua: "Ottieni una Dua islamica giornaliera",
-                    fact: "Ottieni un fatto interessante casuale",
-                    fancy: "Converti il testo normale in caratteri e decorazioni eleganti",
-                    flip: "Capovolgi il testo sottosopra",
-                    gennum: "Genera un numero di telefono fittizio per un paese specifico",
-                    gta: "Ottieni gli ultimi aggiornamenti e bonus settimanali di GTA Online",
-                    hack: "Esegui una finta simulazione di hacking divertente",
-                    hadith: "Ottieni un Hadith casuale",
-                    hidetag: "Tagga tutti i membri del gruppo in modo invisibile",
-                    islamicdate: "Ottieni la data islamica/Hijri corrente",
-                    meme: "Ottieni un meme divertente casuale",
-                    owner: "Mostra il link della community del bot",
-                    pickup: "Ottieni una frase di corteggiamento divertente",
-                    ping: "Verifica la latenza e la velocità di risposta del bot",
-                    poll: "Crea un sondaggio di voto",
-                    prefix: "Modifica il prefisso dei comandi del bot",
-                    quote: "Ottieni una citazione stimolante",
-                    quran: "Ottieni la traduzione casuale di un versetto coranico",
-                    roast: "Invia un arrosto leggero e divertente",
-                    sticker: "Converti qualsiasi immagine in un adesivo WhatsApp",
-                    style: "Converti testo o nomi in caratteri eleganti",
-                    tagall: "Menziona tutti i membri nel gruppo",
-                    take: "Ottieni o rinomina il pacchetto e l'autore di un adesivo",
-                    time: "Ottieni ora, codice e meteo in tempo reale per qualsiasi paese",
-                    translate: "Traduci il testo in qualsiasi lingua",
-                    url: "Converti un'immagine in un URL pubblico",
-                    vaporwave: "Converti il testo in stile estetico vaporwave",
-                    weather: "Ottieni dettagli meteorologici in tempo reale per qualsiasi città",
-                    ytmp3: "Scarica l'audio dai link video di YouTube"
-                }
+                notFound: "Nessun comando trovato o caricato."
             },
             ur: {
-                title: "مرکزی مینو",
-                notFound: "کوئی کمانڈ نہیں ملی۔",
                 categories: { GENERAL: "جنرل", TOOLS: "ٹولز", AI: "اے آئی", GROUP: "گروپ" },
-                descriptions: {
-                    menu: "مین کمانڈ لسٹ دکھاتا ہے",
-                    setlang: "بوٹ کی زبان تبدیل کریں (en/it/ur)",
-                    adduser: "نیا یوزر اونرز لسٹ میں شامل کریں",
-                    install: "را یو آر ایل کے ذریعے نیا پلگ ان انسٹال کریں",
-                    ai: "گوگل جمنای اے آئی کے ساتھ چیٹ کریں",
-                    alive: "چیک کریں کہ بوٹ آن لائن ہے یا نہیں",
-                    "99names": "اللہ کے 99 پیارے ناموں میں سے ایک حاصل کریں",
-                    anon: "کسی کو گمنام پیغام بھیجیں",
-                    antilink: "گروپ میں اینٹی لنک پروٹیکشن آن یا آف کریں",
-                    ascii: "ٹیکسٹ کو خوبصورت ASCII آرٹ میں تبدیل کریں",
-                    broadcast: "تمام چیٹس میں براڈکاسٹ پیغام بھیجیں",
-                    calc: "ریاضی کے حساب کتاب کریں",
-                    cat: "بلی کی ایک پیاری تصویر حاصل کریں",
-                    clear: "کسی پیغام کا جواب دے کر اسے ڈیلیٹ کریں",
-                    dog: "کتے کی ایک پیاری تصویر حاصل کریں",
-                    dua: "روزانہ کی اسلامی دعا حاصل کریں",
-                    fact: "ایک دلچسپ حقیقت حاصل کریں",
-                    fancy: "عام ٹیکسٹ کو اسٹائلش فونٹس میں بدلیں",
-                    flip: "ٹیکسٹ کو الٹا کریں",
-                    gennum: "مخصوص ملک کا نقلی فون نمبر بنائیں",
-                    gta: "GTA Online کی ہفتہ وار اپڈیٹس اور بونس حاصل کریں",
-                    hack: "جعلی اور مزاحیہ ہیکنگ سیمুলেشن چلائیں",
-                    hadith: "ایک مبارک حدیث حاصل کریں",
-                    hidetag: "گروپ کے تمام ممبران کو پوشیدہ طور پر ٹیگ کریں",
-                    islamicdate: "موجودہ ہجری/اسلامی تاریخ معلوم کریں",
-                    meme: "ایک مزاحیہ میم حاصل کریں",
-                    owner: "بوٹ کمیونٹی کا لنک دیکھیں",
-                    pickup: "ایک مزاحیہ پک اپ لائن حاصل کریں",
-                    ping: "بوٹ کی رفتار اور لیٹنسی چیک کریں",
-                    poll: "ووٹنگ پول بنائیں",
-                    prefix: "بوٹ کا کمانڈ پریفکس تبدیل کریں",
-                    quote: "ایک متاثر کن قول حاصل کریں",
-                    quran: "قرآن پاک کی آیت کا ترجمہ حاصل کریں",
-                    roast: "ایک ہلکا پھلکا اور مزاحیہ روسٹ بھیجیں",
-                    sticker: "کسی بھی تصویر کو واٹس ایپ اسٹیکر میں بدلیں",
-                    style: "ٹیکسٹ کو اسٹائلش فونٹس میں بدلیں",
-                    tagall: "گروپ کے تمام ممبران کو مینشن کریں",
-                    take: "اسٹیکر کا پ্যাক نام اور مصنف تبدیل کریں",
-                    time: "کسی بھی ملک کا لائیو وقت اور موسم معلوم کریں",
-                    translate: "کسی بھی زبان میں متن کا ترجمہ کریں",
-                    url: "تصویر کو پبلک یو آر ایل میں تبدیل کریں",
-                    vaporwave: "ٹیکسٹ کو ویپورویو اسٹائل میں بدلیں",
-                    weather: "کسی بھی شہر کا موسم معلوم کریں",
-                    ytmp3: "یوٹیوب ویڈیو سے آڈیو ڈاؤن لوڈ کریں"
-                }
+                notFound: "کوئی کمانڈ نہیں ملی۔"
             }
         };
 
         const t = translations[langCode] || translations["en"];
-
         const commandsDir = path.join(__dirname);
         const categories = {};
 
@@ -194,11 +73,7 @@ module.exports = {
                             const rawCat = (command.category || "GENERAL").toUpperCase();
                             const cat = t.categories[rawCat] || rawCat;
                             if (!categories[cat]) categories[cat] = [];
-                            
-                            // Smart translation lookup
-                            let desc = t.descriptions[command.name] || command.description || "";
-                            
-                            categories[cat].push({ name: command.name, description: desc });
+                            categories[cat].push(command.name);
                         }
                     } catch (err) {
                         console.error(`Error loading command file ${file}:`, err);
@@ -209,29 +84,44 @@ module.exports = {
             console.error("Error reading commands folder:", e);
         }
 
+        // Build Menu Output matching the exact requested style
         let menuText = 
-            `╔════════════════════════════╗\n` +
-            `║     ✦ THE SYNDICATE ✦      ║\n` +
-            `╠════════════════════════════╣\n` +
-            `║ ${t.title.padEnd(26)}║\n` +
-            `║ LANG    :: ${langCode.toUpperCase().padEnd(16)}║\n` +
-            `║ PREFIX  :: ${prefix.padEnd(16)}║\n` +
-            `╚════════════════════════════╝\n\n`;
+            `╭═══ THE SYNDICATE ═══⊷\n` +
+            `┃❃╭──────────────\n` +
+            `┃❃│ Prefix  : ${prefix}\n` +
+            `┃❃│ User    : ${pushName}\n` +
+            `┃❃│ Time    : ${timeStr}\n` +
+            `┃❃│ Day     : ${dayStr}\n` +
+            `┃❃│ Date    : ${dateStr}\n` +
+            `┃❃│ Version : 2.5.0\n` +
+            `┃❃│ Status  : Online\n` +
+            `┃❃│ Platform: VPS\n` +
+            `┃❃│ Server  : https://discord.gg/syndicateps\n` +
+            `┃❃╰───────────────\n` +
+            `╰═════════════════⊷\n\n`;
 
         const sortedCategories = Object.keys(categories).sort();
         if (sortedCategories.length === 0) {
-            menuText += `┃ ${t.notFound}\n`;
+            menuText += ` ╭─❏ ɴᴏᴛ 𝚏𝙾𝚄𝙽𝙳 ❏\n │ ${t.notFound}\n ╰─────────────────\n\n`;
         } else {
             for (const cat of sortedCategories) {
-                menuText += `┏━━━━━━━〔 ${cat} 〕━━━━━━━┓\n\n`;
-                categories[cat].sort((a, b) => a.name.localeCompare(b.name));
-                for (const cmd of categories[cat]) {
-                    const desc = cmd.description ? `\n┃   └─ ${cmd.description}` : "";
-                    menuText += `┃◈ ${prefix}${cmd.name}${desc}\n┃\n`;
+                const fancyCat = cat.toLowerCase(); // keep categories lowercase styled or uppercase as requested
+                menuText += ` ╭─❏ ${fancyCat} ❏\n`;
+                categories[cat].sort((a, b) => a.localeCompare(b));
+                for (const cmdName of categories[cat]) {
+                    menuText += ` │ ${fancyFont(cmdName.toUpperCase())}\n`;
                 }
-                menuText += `┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
+                menuText += ` ╰─────────────────\n\n`;
             }
         }
+
+        menuText += 
+            `╭═══ THE SYNDICATE ═══⊷\n` +
+            `┃\n` +
+            `┃\n` +
+            `┃\n` +
+            `┃❃ Server : https://discord.gg/syndicateps\n` +
+            `╰════════════════════⊷`;
 
         let targetChat = msg.key?.remoteJid || sender;
         if (targetChat) {
