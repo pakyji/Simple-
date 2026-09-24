@@ -1,26 +1,19 @@
 module.exports = {
     name: "clear",
     category: "TOOLS",
-    description: "Clear or delete messages from the chat",
-    execute: async (sock, msg, sender) => {
-        let targetChat = msg.key?.remoteJid || sender;
-        
+    description: "Clears the chat history",
+    async execute(sock, msg, sender) {
         try {
-            // Sends a confirmation message that the chat action was triggered
-            await sock.sendMessage(targetChat, { text: "✨ Chat cleared successfully!" }, { quoted: msg });
+            // Tentativo di eliminare/ripulire la chat utilizzando chatModify di Baileys
+            await sock.chatModify(
+                { delete: true, lastMessages: [msg] },
+                sender
+            );
             
-            // If you reply to a specific message, it deletes that replied message
-            if (msg.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
-                const targetKey = {
-                    remoteJid: targetChat,
-                    id: msg.message.extendedTextMessage.contextInfo.stanzaId,
-                    participant: msg.message.extendedTextMessage.contextInfo.participant
-                };
-                await sock.sendMessage(targetChat, { delete: targetKey });
-            }
+            await sock.sendMessage(sender, { text: "✨ Chat cleared successfully!" }, { quoted: msg });
         } catch (error) {
-            console.error("Error executing clear command:", error);
-            await sock.sendMessage(targetChat, { text: "❌ An error occurred while running the command." }, { quoted: msg });
+            console.error("❌ Error in clear command:", error.message || error);
+            await sock.sendMessage(sender, { text: "❌ Impossibile pulire la chat a causa di restrizioni di Baileys." }, { quoted: msg });
         }
     }
 };
